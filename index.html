@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CORP. Aeropuerto Los Mochis</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+:root{--bg:#f0f4f8;--surface:#fff;--surface2:#f7f9fc;--border:#dde3ed;--accent:#d97706;--accent2:#2563eb;--green:#059669;--red:#dc2626;--text:#1e2433;--text2:#6b7280;--shadow:0 1px 4px rgba(0,0,0,0.08);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast-msg{background:#1e2433;color:#fff;padding:10px 18px;border-radius:10px;font-size:.82rem;font-weight:600;box-shadow:0 4px 20px rgba(0,0,0,.25);opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none;}
+.toast-msg.show{opacity:1;transform:translateY(0);}
+.toast-msg.ok{border-left:3px solid #059669;}
+.toast-msg.err{border-left:3px solid #dc2626;}
+.toast-msg.info{border-left:3px solid #d97706;}
+
+/* ── LOADING OVERLAY ── */
+#loading-overlay{position:fixed;inset:0;background:rgba(30,36,51,.7);z-index:99998;display:flex;align-items:center;justify-content:center;display:none;}
+.loading-spinner{width:40px;height:40px;border:3px solid rgba(217,119,6,.3);border-top-color:#d97706;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── LOGIN ── */
+#login-screen{position:fixed;inset:0;background:linear-gradient(135deg,#1e2433 0%,#2d3a50 100%);display:flex;align-items:center;justify-content:center;z-index:9999;}
+.login-box{background:#fff;border-radius:20px;padding:40px 36px;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,0.35);text-align:center;}
+.login-logo{font-size:2.5rem;margin-bottom:12px;}
+.login-empresa{font-family:'Syne',sans-serif;font-size:.78rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.08em;line-height:1.5;margin-bottom:24px;}
+.login-title{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:#1e2433;margin-bottom:6px;}
+.login-sub{font-size:.82rem;color:#888;margin-bottom:28px;}
+.login-group{text-align:left;margin-bottom:16px;}
+.login-group label{display:block;font-size:.72rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.login-group input{width:100%;padding:11px 14px;border:1.5px solid #dde3ed;border-radius:10px;font-size:.9rem;font-family:'DM Sans',sans-serif;color:#1e2433;outline:none;transition:border-color .15s;}
+.login-group input:focus{border-color:#d97706;box-shadow:0 0 0 3px rgba(217,119,6,.12);}
+.login-btn{width:100%;background:#d97706;color:#fff;border:none;padding:12px;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;cursor:pointer;margin-top:4px;letter-spacing:.02em;}
+.login-btn:hover{opacity:.88;}
+.login-err{font-size:.8rem;color:#dc2626;margin-top:10px;min-height:18px;}
+
+/* ── NAVBAR ── */
+#app{display:none;}
+.navbar{background:#1e2433;padding:0 24px;display:flex;align-items:center;gap:0;height:56px;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+.nav-brand{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:800;color:#d97706;margin-right:24px;white-space:nowrap;line-height:1.3;}
+.nav-brand span{display:block;font-size:.6rem;color:#aaa;font-weight:400;letter-spacing:.05em;}
+.nav-tabs{display:flex;gap:4px;flex:1;}
+.nav-tab{padding:8px 18px;font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;color:#aaa;background:transparent;border:none;border-radius:8px;cursor:pointer;text-transform:uppercase;letter-spacing:.05em;transition:all .15s;}
+.nav-tab:hover{color:#fff;background:rgba(255,255,255,.08);}
+.nav-tab.active{color:#d97706;background:rgba(217,119,6,.15);}
+.nav-logout{padding:7px 14px;font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;color:#aaa;background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:8px;cursor:pointer;text-transform:uppercase;letter-spacing:.05em;margin-left:auto;}
+.nav-logout:hover{color:#fff;border-color:rgba(255,255,255,.4);}
+.nav-sync{padding:7px 14px;font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;color:#aaa;background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:8px;cursor:pointer;text-transform:uppercase;letter-spacing:.05em;margin-left:8px;display:flex;align-items:center;gap:5px;}
+.nav-sync:hover{color:#d97706;border-color:rgba(217,119,6,.5);}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:#059669;}
+.sync-dot.offline{background:#dc2626;}
+
+/* ── MÓDULOS ── */
+.modulo{display:none;}
+.modulo.active{display:block;}
+
+/* ══════════════════════════════
+   MÓDULO 1: SERVICIOS AEROPUERTO
+══════════════════════════════ */
+.svc-header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);}
+.svc-header h2{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);}
+.btn-new{background:var(--accent);color:#fff;border:none;padding:8px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;}
+.btn-new:hover{opacity:.85;}
+.layout{display:grid;grid-template-columns:1fr 340px;height:calc(100vh - 56px - 57px);}
+.calendar-panel{padding:20px;overflow-y:auto;}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.cal-nav h2{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;text-transform:capitalize;}
+.cal-nav button{background:var(--surface);border:1px solid var(--border);color:var(--text);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:1rem;box-shadow:var(--shadow);}
+.cal-nav button:hover{background:var(--border);}
+.cal-grid-header{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;}
+.cal-grid-header span{text-align:center;font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;padding:4px 0;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
+.cal-cell{background:var(--surface);border:1px solid var(--border);border-radius:8px;min-height:80px;padding:6px;cursor:pointer;transition:border-color .15s;box-shadow:var(--shadow);}
+.cal-cell:hover{border-color:var(--accent);}
+.cal-cell.other-month{opacity:.4;}
+.cal-cell.today{border-color:var(--accent2);background:#eff6ff;}
+.cal-cell .day-num{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;color:var(--text2);margin-bottom:4px;display:block;}
+.cal-cell.today .day-num{color:var(--accent2);}
+.service-dot{display:block;font-size:.65rem;font-weight:600;padding:2px 5px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.service-dot.pendiente{background:#fef3c7;color:#92400e;}
+.service-dot.realizado{background:#d1fae5;color:#065f46;}
+.service-dot.cancelado{background:#fee2e2;color:#991b1b;}
+.side-panel{background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.side-tabs{display:flex;border-bottom:1px solid var(--border);}
+.side-tab{flex:1;padding:12px;background:none;border:none;color:var(--text2);font-family:'Syne',sans-serif;font-size:.78rem;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;text-transform:uppercase;letter-spacing:.05em;}
+.side-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:#fffbf0;}
+.side-content{flex:1;overflow-y:auto;padding:16px;background:var(--surface2);}
+.form-section-title{font-family:'Syne',sans-serif;font-size:.7rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.1em;margin:16px 0 10px;padding-bottom:6px;border-bottom:2px solid #fde68a;}
+.form-section-title:first-child{margin-top:0;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-group{margin-bottom:12px;}
+.form-group label{display:block;font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:#fff;border:1.5px solid var(--border);color:var(--text);padding:9px 12px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none;transition:border-color .15s;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(217,119,6,.12);}
+.form-group textarea{resize:vertical;min-height:60px;}
+.btn-submit{width:100%;background:var(--accent);color:#fff;border:none;padding:10px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;margin-top:4px;}
+.btn-submit:hover{opacity:.88;}
+.service-card{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;box-shadow:var(--shadow);transition:border-color .15s;}
+.service-card:hover{border-color:var(--accent);}
+.sc-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.sc-client{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:800;flex:1;min-width:0;}
+.status-badge{font-size:.65rem;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap;cursor:pointer;border:none;}
+.status-badge.pendiente{background:#fef3c7;color:#92400e;}
+.status-badge.realizado{background:#d1fae5;color:#065f46;}
+.status-badge.cancelado{background:#fee2e2;color:#991b1b;}
+.sc-meta{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;}
+.sc-tag{font-size:.7rem;padding:2px 8px;border-radius:20px;font-weight:600;}
+.sc-tag.agencia{background:#dbeafe;color:#1d4ed8;}
+.sc-tag.vuelo{background:#ede9fe;color:#6d28d9;}
+.sc-tag.unidad{background:#d1fae5;color:#065f46;}
+.sc-date{font-size:.73rem;color:var(--accent2);font-weight:600;margin-bottom:4px;}
+.sc-row{font-size:.76rem;color:var(--text2);margin-bottom:3px;line-height:1.4;}
+.sc-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.sc-btn{font-size:.68rem;font-weight:600;padding:4px 10px;border-radius:6px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;transition:all .15s;}
+.sc-btn.del:hover{border-color:var(--red);color:var(--red);background:#fff0f0;}
+.sc-btn.banner{background:#1e2433;border-color:#1e2433;color:#f5f5f5;font-weight:700;}
+.sc-btn.banner:hover{opacity:.85;}
+.empty-state{text-align:center;color:var(--text2);font-size:.82rem;padding:32px 16px;line-height:1.6;}
+.status-picker{position:fixed;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:8px;z-index:1000;box-shadow:0 8px 32px rgba(0,0,0,.12);min-width:160px;}
+.sp-opt{display:block;width:100%;padding:8px 14px;background:none;border:none;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;border-radius:6px;text-align:left;transition:background .12s;}
+.sp-opt:hover{background:var(--bg);}
+.modal-overlay{position:fixed;inset:0;background:rgba(30,36,51,.45);z-index:2000;display:flex;align-items:center;justify-content:center;padding:16px;}
+.modal-box{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:24px;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.18);}
+.modal-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;margin-bottom:4px;}
+.modal-sub{font-size:.78rem;color:var(--text2);margin-bottom:20px;}
+.modal-label{font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:block;}
+.unidades-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.unidad-btn{background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:12px 10px;cursor:pointer;text-align:center;transition:all .15s;color:var(--text);font-family:'DM Sans',sans-serif;}
+.unidad-btn:hover{border-color:var(--green);background:#f0fdf4;}
+.unidad-btn.selected{border-color:var(--green);background:#d1fae5;}
+.unidad-btn .u-icon{font-size:1.4rem;display:block;margin-bottom:4px;}
+.unidad-btn .u-name{font-size:.8rem;font-weight:700;display:block;}
+.unidad-btn .u-plates{font-size:.68rem;color:var(--text2);display:block;margin-top:2px;}
+.modal-input{margin-bottom:16px;}
+.modal-divider{text-align:center;font-size:.72rem;color:var(--text2);margin:12px 0;}
+.modal-actions{display:flex;gap:10px;}
+.modal-cancel{flex:1;background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);padding:10px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;}
+.modal-cancel:hover{background:var(--border);}
+.modal-confirm{flex:2;background:var(--green);border:none;color:#fff;padding:10px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;}
+.modal-confirm:hover{opacity:.88;}
+.banner-popup{position:fixed;inset:0;background:rgba(30,36,51,.55);z-index:3000;display:flex;align-items:center;justify-content:center;padding:16px;}
+.banner-box{background:var(--surface);border:1.5px solid var(--border);border-radius:20px;padding:28px 24px;width:100%;max-width:420px;box-shadow:0 24px 64px rgba(0,0,0,.2);text-align:center;}
+.banner-icon{font-size:2.5rem;margin-bottom:10px;display:block;}
+.banner-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:4px;}
+.banner-sub{font-size:.8rem;color:var(--text2);margin-bottom:20px;line-height:1.5;}
+.banner-preview{background:#fff;border:3px solid #000;border-radius:4px;padding:22px 18px 16px;margin-bottom:20px;text-align:left;position:relative;min-height:130px;}
+.bp-welcome{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:#000;letter-spacing:.06em;line-height:1;}
+.bp-client{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#000;margin-top:6px;}
+.bp-footer{margin-top:18px;font-size:.6rem;color:#333;line-height:1.7;}
+.banner-actions{display:flex;gap:10px;}
+.banner-cancel-btn{flex:1;background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);padding:11px;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;}
+.banner-cancel-btn:hover{background:var(--border);}
+.banner-gen-btn{flex:2;background:#1e2433;border:none;color:#fff;padding:11px;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:.88rem;cursor:pointer;letter-spacing:.02em;}
+.banner-gen-btn:hover{opacity:.88;}
+.filter-bar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.filter-btn{font-size:.68rem;font-weight:700;padding:5px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);cursor:pointer;text-transform:uppercase;letter-spacing:.04em;transition:all .15s;}
+.filter-btn.active{background:var(--accent);border-color:var(--accent);color:#fff;}
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.stat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:8px;padding:10px;text-align:center;box-shadow:var(--shadow);}
+.stat-num{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;display:block;}
+.stat-label{font-size:.65rem;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;font-weight:600;}
+
+/* ══════════════════════════════
+   MÓDULO 2: CRÉDITOS
+══════════════════════════════ */
+.cred-wrap{padding:16px;}
+.metrics{display:grid;gap:10px;margin-bottom:16px;}
+.metrics.c2{grid-template-columns:repeat(2,1fr);}
+.metric{background:#fff;border-radius:6px;padding:12px 14px;border:1px solid #eee;}
+.metric-label{font-size:11px;color:#888;margin-bottom:4px;}
+.metric-value{font-size:20px;font-weight:600;color:#111;}
+.metric-value.red{color:#c0392b;}
+.metric-value.green{color:#3B6D11;}
+.form-box{background:#fff;border-radius:8px;padding:14px;margin-bottom:16px;border:1px solid #eee;}
+.fg{margin-bottom:10px;}
+.fg label{display:block;font-size:11px;color:#666;margin-bottom:3px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;}
+.fg input,.fg select{width:100%;padding:6px 8px;font-size:13px;border:1px solid #ccc;border-radius:5px;background:#fff;color:#111;}
+.cg5{display:grid;grid-template-columns:120px 2fr 1fr 1fr auto;gap:8px;align-items:end;}
+.cg6{display:grid;grid-template-columns:170px 1fr 1fr 1fr 1fr auto;gap:8px;align-items:end;}
+.cg4{display:grid;grid-template-columns:200px 1fr 1fr auto;gap:8px;align-items:end;}
+.cbtn{padding:7px 14px;font-size:12px;font-weight:600;border:none;border-radius:5px;cursor:pointer;white-space:nowrap;}
+.cbtn-blue{background:#185FA5;color:#fff;}
+.cbtn-green{background:#3B6D11;color:#fff;}
+.cbtn-orange{background:#854F0B;color:#fff;}
+.cbtn-gray{background:#555;color:#fff;}
+.cbtn-or{background:transparent;color:#c0392b;border:1px solid #c0392b;padding:5px 10px;font-size:12px;font-weight:600;border-radius:5px;cursor:pointer;}
+.cbtn-ob{background:transparent;color:#185FA5;border:1px solid #185FA5;padding:5px 10px;font-size:12px;font-weight:600;border-radius:5px;cursor:pointer;}
+.cbtn-og{background:transparent;color:#3B6D11;border:1px solid #3B6D11;padding:5px 10px;font-size:12px;font-weight:600;border-radius:5px;cursor:pointer;}
+.cbtn-oo{background:transparent;color:#854F0B;border:1px solid #854F0B;padding:5px 10px;font-size:12px;font-weight:600;border-radius:5px;cursor:pointer;}
+.ctbl-wrap{overflow-x:auto;border:1px solid #ddd;border-radius:8px;background:#fff;margin-bottom:16px;}
+table.ctbl{width:100%;border-collapse:collapse;font-size:12px;}
+table.ctbl th{text-align:left;padding:8px 10px;font-size:11px;font-weight:600;color:#666;border-bottom:1px solid #eee;white-space:nowrap;background:#fafafa;}
+table.ctbl td{padding:8px 10px;border-bottom:1px solid #f0f0f0;vertical-align:middle;}
+table.ctbl tr:last-child td{border-bottom:none;}
+.cbadge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;}
+.cbadge-ok{background:#EAF3DE;color:#3B6D11;}
+.cbadge-low{background:#FAEEDA;color:#854F0B;}
+.cbadge-red{background:#FCEBEB;color:#c0392b;}
+.cbadge-blue{background:#E6F1FB;color:#185FA5;}
+.cflex{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;}
+.cerr{font-size:12px;color:#c0392b;margin-top:6px;}
+.cwarn{font-size:12px;color:#854F0B;margin-top:6px;}
+.ctitle{font-size:13px;font-weight:600;color:#555;margin-bottom:8px;}
+.ctabs{display:flex;gap:4px;padding:12px 16px 0;background:#fff;border-bottom:1px solid #ddd;flex-wrap:wrap;}
+.ctab{padding:8px 16px;font-size:13px;font-weight:500;color:#666;background:transparent;border:1px solid transparent;border-bottom:none;border-radius:6px 6px 0 0;cursor:pointer;}
+.ctab.active{color:#111;background:#fff;border-color:#ddd;}
+.c-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:4000;padding:16px;}
+.c-modal{background:#fff;border-radius:10px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.25);}
+.c-modal-title{font-size:15px;font-weight:700;color:#111;margin-bottom:4px;}
+.c-modal-sub{font-size:13px;color:#555;margin-bottom:14px;}
+.check-list{border:1px solid #e0e0e0;border-radius:7px;overflow:hidden;margin-bottom:12px;}
+.check-item{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0;}
+.check-item:last-child{border-bottom:none;}
+.check-item.sel{background:#f0f7ff;}
+.check-box{width:18px;height:18px;border-radius:4px;border:2px solid #ccc;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;font-weight:700;color:#fff;}
+.check-box.sel{background:#185FA5;border-color:#185FA5;}
+.check-info{flex:1;min-width:0;}
+.check-name{font-size:12px;font-weight:600;color:#222;}
+.check-amt{font-size:13px;font-weight:700;color:#c0392b;flex-shrink:0;}
+.total-bar{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid #eee;border-bottom:1px solid #eee;margin-bottom:12px;}
+.mode-btns{display:flex;gap:8px;margin-bottom:12px;}
+.mode-btn{flex:1;padding:7px;font-size:12px;font-weight:600;border:1.5px solid #ddd;border-radius:6px;cursor:pointer;background:#f5f5f5;color:#555;transition:all .15s;}
+.mode-btn.active{background:#185FA5;border-color:#185FA5;color:#fff;}
+.cpage{display:none;}
+.cpage.active{display:block;}
+
+/* PDF */
+.pdf-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:5000;display:flex;align-items:flex-start;justify-content:center;padding:24px;overflow-y:auto;}
+.pdf-box{background:#fff;width:100%;max-width:780px;border-radius:10px;overflow:hidden;box-shadow:0 16px 64px rgba(0,0,0,.3);}
+.pdf-toolbar{background:#1e2433;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;color:#fff;font-size:13px;font-weight:600;}
+.pdf-body{padding:32px;background:#fff;}
+.pdf-header-box{margin-bottom:24px;}
+.pdf-header-box h1{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#1e2433;}
+.pdf-header-box p{font-size:12px;color:#888;margin-top:4px;}
+.pdf-info-row{display:flex;gap:24px;flex-wrap:wrap;margin-bottom:20px;padding:14px;background:#f7f9fc;border-radius:8px;border:1px solid #eee;}
+.pdf-info-item{display:flex;flex-direction:column;gap:2px;}
+.pdf-info-item label{font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.06em;}
+.pdf-info-item span{font-size:13px;font-weight:600;color:#111;}
+table.pdf-tbl{width:100%;border-collapse:collapse;font-size:12px;}
+table.pdf-tbl th{text-align:left;padding:8px 10px;font-weight:700;color:#555;border-bottom:2px solid #eee;font-size:11px;}
+table.pdf-tbl td{padding:8px 10px;border-bottom:1px solid #f5f5f5;}
+table.pdf-tbl th.r,table.pdf-tbl td.r{text-align:right;}
+table.pdf-tbl td.red{color:#c0392b;font-weight:700;}
+.pdf-total-row{background:#f5f5f5;}
+.pdf-foot{display:flex;justify-content:space-between;margin-top:24px;padding-top:14px;border-top:1px solid #eee;font-size:11px;color:#888;}
+@media print{
+  body>*:not(.pdf-overlay){display:none!important;}
+  .pdf-overlay{position:static;background:none;padding:0;}
+  .pdf-box{box-shadow:none;max-width:100%;}
+  .pdf-toolbar{display:none!important;}
+}
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+<div id="loading-overlay"><div class="loading-spinner"></div></div>
+
+<!-- ══ LOGIN ══ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">✈️</div>
+    <div class="login-empresa">Corp. de Trabajadores del Serv. Púb. Fed.<br>Aeropuerto de Los Mochis</div>
+    <div class="login-title">Acceso al Sistema</div>
+    <div class="login-sub">Ingresa tus credenciales para continuar</div>
+    <div class="login-group"><label>Usuario</label><input id="login-user" type="text" placeholder="usuario" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="login-group"><label>Contraseña</label><input id="login-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-err" id="login-err"></div>
+  </div>
+</div>
+
+<!-- ══ APP ══ -->
+<div id="app">
+  <nav class="navbar">
+    <div class="nav-brand">CORP. AEROPUERTO<span>Los Mochis · Sistema de Gestión</span></div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="showModulo('servicios',this)">📅 Servicios</button>
+      <button class="nav-tab" onclick="showModulo('creditos',this)">💳 Créditos</button>
+    </div>
+    <button class="nav-sync" id="syncBtn" onclick="syncAll()" title="Estado de conexión">
+      <span class="sync-dot" id="syncDot"></span> Nube
+    </button>
+    <button class="nav-logout" onclick="cerrarSesion()">Salir</button>
+  </nav>
+
+  <!-- ══ MÓDULO SERVICIOS ══ -->
+  <div id="mod-servicios" class="modulo active">
+    <div class="svc-header">
+      <h2>📅 Agenda de Servicios</h2>
+      <button class="btn-new" onclick="switchTab('agendar')">+ Nuevo servicio</button>
+    </div>
+    <div class="layout">
+      <div class="calendar-panel">
+        <div class="cal-nav">
+          <button onclick="changeMonth(-1)">‹</button>
+          <h2 id="calTitle"></h2>
+          <button onclick="changeMonth(1)">›</button>
+        </div>
+        <div class="cal-grid-header">
+          <span>Dom</span><span>Lun</span><span>Mar</span><span>Mié</span><span>Jue</span><span>Vie</span><span>Sáb</span>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+      <div class="side-panel">
+        <div class="side-tabs">
+          <button class="side-tab active" id="tab-lista" onclick="switchTab('lista')">Lista</button>
+          <button class="side-tab" id="tab-agendar" onclick="switchTab('agendar')">Agendar</button>
+        </div>
+        <div class="side-content" id="sideContent"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MÓDULO CRÉDITOS ══ -->
+  <div id="mod-creditos" class="modulo">
+    <div class="ctabs">
+      <button class="ctab active" onclick="cShowTab('cclientes',this)">Clientes</button>
+      <button class="ctab" onclick="cShowTab('ccreditos',this)">Créditos</button>
+      <button class="ctab" onclick="cShowTab('cporcliente',this)">Por cliente</button>
+      <button class="ctab" onclick="cShowTab('cporunidad',this)">Por unidad</button>
+    </div>
+    <div class="cred-wrap">
+      <div id="cTab-cclientes" class="cpage active"></div>
+      <div id="cTab-ccreditos" class="cpage"></div>
+      <div id="cTab-cporcliente" class="cpage"></div>
+      <div id="cTab-cporunidad" class="cpage"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SERVICIOS: POPUPS ══ -->
+<div class="status-picker" id="statusPicker" style="display:none;">
+  <button class="sp-opt" onclick="handleStatusSelect('pendiente')">🟡 Pendiente</button>
+  <button class="sp-opt" onclick="handleStatusSelect('realizado')">🟢 Realizado</button>
+  <button class="sp-opt" onclick="handleStatusSelect('cancelado')">🔴 Cancelado</button>
+</div>
+<div class="modal-overlay" id="modalUnidad" style="display:none;">
+  <div class="modal-box">
+    <div class="modal-title">🚗 ¿Qué unidad realizó el servicio?</div>
+    <div class="modal-sub" id="modalSubtitle"></div>
+    <span class="modal-label">Unidades registradas</span>
+    <div class="unidades-grid" id="unidadesGrid"></div>
+    <div class="modal-divider">— o escribe una unidad —</div>
+    <div class="modal-input"><input id="unidadInput" type="text" placeholder="Ej. Suburban Blanca · ABC-123"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="cerrarModalUnidad()">Cancelar</button>
+      <button class="modal-confirm" onclick="confirmarRealizado()">✓ Confirmar</button>
+    </div>
+  </div>
+</div>
+<div class="banner-popup" id="bannerPopup" style="display:none;">
+  <div class="banner-box">
+    <span class="banner-icon">🖨️</span>
+    <div class="banner-title">Banner de Bienvenida</div>
+    <div class="banner-sub">Se descargará un PDF horizontal listo para imprimir.</div>
+    <div class="banner-preview">
+      <div class="bp-welcome">BIENVENIDOS</div>
+      <div class="bp-client" id="bp-name">—</div>
+      <div class="bp-footer" id="bp-footer">—</div>
+    </div>
+    <div class="banner-actions">
+      <button class="banner-cancel-btn" onclick="cerrarBanner()">Cancelar</button>
+      <button class="banner-gen-btn" onclick="generarBannerPDF()">🖨️ Generar BANNER</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CRÉDITOS: MODAL PAGO ══ -->
+<div class="c-overlay" id="c-modal-pago" style="display:none">
+  <div class="c-modal">
+    <div class="c-modal-title">Registrar pago</div>
+    <div class="c-modal-sub" id="c-modal-sub"></div>
+    <div style="font-size:11px;color:#555;margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Servicios pendientes</div>
+    <div class="check-list" id="c-check-list"></div>
+    <div class="total-bar"><span id="c-sel-count" style="font-size:13px;color:#555"></span><span id="c-sel-total" style="font-size:14px;font-weight:700;color:#c0392b"></span></div>
+    <div class="mode-btns">
+      <button class="mode-btn active" id="c-btn-completo" onclick="cSetModo(false)">Pagar completo</button>
+      <button class="mode-btn" id="c-btn-libre" onclick="cSetModo(true)">Monto libre</button>
+    </div>
+    <div id="c-monto-libre-box" style="display:none;margin-bottom:12px">
+      <label style="font-size:11px;color:#555;display:block;margin-bottom:4px;font-weight:600">Monto a pagar ($)</label>
+      <input id="c-monto-libre" type="number" min="0.01" step="0.01" placeholder="0.00" style="width:100%;padding:6px 8px;font-size:13px;border:1px solid #ccc;border-radius:5px;color:#111;background:#fff">
+    </div>
+    <div class="cerr" id="c-pago-err"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+      <button style="padding:7px 16px;font-size:13px;font-weight:500;border:1px solid #ccc;border-radius:6px;cursor:pointer;background:#f5f5f5;color:#333" onclick="cCerrarPago()">Cancelar</button>
+      <button class="cbtn cbtn-green" onclick="cAplicarPago()">Aplicar pago</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CRÉDITOS: PDF PREVIEW ══ -->
+<div class="pdf-overlay" id="pdf-overlay" style="display:none">
+  <div class="pdf-box">
+    <div class="pdf-toolbar">
+      <span>Vista previa — Estado de cuenta</span>
+      <div style="display:flex;gap:8px">
+        <button class="cbtn cbtn-orange" onclick="window.print()">Imprimir / Guardar PDF</button>
+        <button class="cbtn cbtn-gray" onclick="document.getElementById('pdf-overlay').style.display='none'">✕ Cerrar</button>
+      </div>
+    </div>
+    <div class="pdf-body" id="pdf-body"></div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  SUPABASE CONFIG
+// ══════════════════════════════════════════════
+const SUPA_URL = 'https://srwyxisydwiobfpcxeux.supabase.co';
+const SUPA_KEY = 'sb_publishable_xf1MzFPMZxb0fuNumeuCMQ_Bl4jqKD5';
+
+const supa = {
+  async req(method, path, body=null){
+    const opts = {
+      method,
+      headers:{
+        'apikey': SUPA_KEY,
+        'Authorization': 'Bearer ' + SUPA_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': method==='POST' ? 'return=representation' : ''
+      }
+    };
+    if(body) opts.body = JSON.stringify(body);
+    const r = await fetch(SUPA_URL + path, opts);
+    if(!r.ok){
+      const e = await r.text();
+      throw new Error(e);
+    }
+    const txt = await r.text();
+    return txt ? JSON.parse(txt) : [];
+  },
+  get(table, qs='')   { return this.req('GET',    `/rest/v1/${table}?${qs}`); },
+  post(table, data)   { return this.req('POST',   `/rest/v1/${table}`, data); },
+  patch(table, qs, d) { return this.req('PATCH',  `/rest/v1/${table}?${qs}`, d); },
+  del(table, qs)      { return this.req('DELETE', `/rest/v1/${table}?${qs}`); },
+};
+
+// ══ TOAST ══
+function toast(msg, type='ok'){
+  const el=document.createElement('div');
+  el.className=`toast-msg ${type}`;
+  el.textContent=msg;
+  document.getElementById('toast').appendChild(el);
+  setTimeout(()=>el.classList.add('show'),10);
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),300);},3000);
+}
+
+function setLoading(v){
+  document.getElementById('loading-overlay').style.display=v?'flex':'none';
+}
+
+function setSyncStatus(online){
+  const dot=document.getElementById('syncDot');
+  dot.className='sync-dot'+(online?'':' offline');
+}
+
+// ══ LOGIN ══
+const EMPRESA = "CORP. DE TRABAJADORES DEL SERV. PUB. FED. DEL AEROPUERTO DE LOS MOCHIS";
+const USUARIOS = [{user:"admin",pass:"corp2024"},{user:"taxi",pass:"aeropuerto"}];
+
+function doLogin(){
+  const u=document.getElementById('login-user').value.trim();
+  const p=document.getElementById('login-pass').value;
+  const ok=USUARIOS.find(x=>x.user===u&&x.pass===p);
+  if(ok){
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    initApp();
+  } else {
+    document.getElementById('login-err').textContent='Usuario o contraseña incorrectos.';
+  }
+}
+function cerrarSesion(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+  document.getElementById('login-err').textContent='';
+}
+
+async function initApp(){
+  setLoading(true);
+  try {
+    await Promise.all([loadServices(), loadClientes(), loadCreditos()]);
+    renderCalendar(); renderSide(); cRenderAll();
+    setSyncStatus(true);
+    toast('Datos cargados desde la nube ☁️','ok');
+  } catch(e){
+    setSyncStatus(false);
+    toast('Error de conexión: '+e.message,'err');
+  }
+  setLoading(false);
+}
+
+async function syncAll(){
+  setLoading(true);
+  try{
+    await Promise.all([loadServices(), loadClientes(), loadCreditos()]);
+    renderCalendar(); renderSide(); cRenderAll();
+    setSyncStatus(true);
+    toast('Sincronizado correctamente ✓','ok');
+  }catch(e){
+    setSyncStatus(false);
+    toast('Error al sincronizar','err');
+  }
+  setLoading(false);
+}
+
+// ══ MÓDULOS ══
+function showModulo(mod, btn){
+  document.querySelectorAll('.modulo').forEach(m=>m.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('mod-'+mod).classList.add('active');
+  if(btn) btn.classList.add('active');
+  if(mod==='creditos') cRenderAll();
+}
+
+/* ════════════════════════════════════
+   SERVICIOS AEROPUERTO
+════════════════════════════════════ */
+let services = [];
+let unidades = [
+  {id:'u1',nombre:'Suburban Blanca',placas:'ABC-123',icon:'🚐'},
+  {id:'u2',nombre:'Altima Gris',placas:'XYZ-456',icon:'🚗'},
+];
+let currentDate=new Date(), currentTab='lista', activeFilter='todos';
+let statusTargetId=null, bannerServiceId=null;
+
+async function loadServices(){
+  const rows = await supa.get('servicios','select=*&order=fecha.desc');
+  services = rows.map(r=>({
+    id: r.id,
+    cliente: r.cliente,
+    telefono: r.telefono||'',
+    pasajeros: r.pasajeros||'',
+    agencia: r.agencia||'',
+    vuelo: r.vuelo||'',
+    tipoVuelo: r.tipo_vuelo||'',
+    horaVuelo: r.hora_vuelo||'',
+    aerolinea: r.aerolinea||'',
+    fecha: r.fecha||'',
+    hora: r.hora||'',
+    origen: r.origen||'',
+    destino: r.destino||'',
+    desc: r.notas||'',
+    estatus: r.estatus||'pendiente',
+    unidad: r.unidad||''
+  }));
+}
+
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function changeMonth(dir){currentDate.setMonth(currentDate.getMonth()+dir);renderCalendar();}
+
+function renderCalendar(){
+  const year=currentDate.getFullYear(),month=currentDate.getMonth();
+  document.getElementById('calTitle').textContent=currentDate.toLocaleString('es-MX',{month:'long',year:'numeric'});
+  const firstDay=new Date(year,month,1).getDay();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  const daysInPrev=new Date(year,month,0).getDate();
+  const today=new Date();
+  const grid=document.getElementById('calGrid');grid.innerHTML='';
+  for(let i=firstDay-1;i>=0;i--)grid.appendChild(makeCell(daysInPrev-i,year,month-1,true));
+  for(let d=1;d<=daysInMonth;d++){
+    const isToday=d===today.getDate()&&month===today.getMonth()&&year===today.getFullYear();
+    grid.appendChild(makeCell(d,year,month,false,isToday));
+  }
+  const rem=(firstDay+daysInMonth)%7;
+  if(rem!==0)for(let d=1;d<=7-rem;d++)grid.appendChild(makeCell(d,year,month+1,true));
+}
+
+function makeCell(day,year,month,otherMonth,isToday){
+  const cell=document.createElement('div');
+  cell.className='cal-cell'+(otherMonth?' other-month':'')+(isToday?' today':'');
+  const num=document.createElement('span');num.className='day-num';num.textContent=day;cell.appendChild(num);
+  const dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  services.filter(s=>s.fecha===dateStr).slice(0,3).forEach(s=>{
+    const dot=document.createElement('span');dot.className=`service-dot ${s.estatus}`;dot.textContent=s.cliente;
+    dot.onclick=e=>{e.stopPropagation();switchTab('lista');activeFilter='todos';renderSide();};
+    cell.appendChild(dot);
+  });
+  cell.onclick=()=>{switchTab('agendar');setTimeout(()=>{const f=document.getElementById('f-fecha');if(f)f.value=dateStr;},50);};
+  return cell;
+}
+
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.side-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  renderSide();
+}
+function renderSide(){document.getElementById('sideContent').innerHTML=currentTab==='agendar'?renderForm():renderList();}
+
+function renderForm(){return`
+  <div class="form-section-title">👤 Datos del Cliente</div>
+  <div class="form-group"><label>Nombre del cliente *</label><input id="f-cliente" type="text" placeholder="Ej. Juan Pérez"></div>
+  <div class="form-row">
+    <div class="form-group"><label>Teléfono</label><input id="f-telefono" type="tel" placeholder="668 123 4567"></div>
+    <div class="form-group"><label>Pasajeros</label><input id="f-pasajeros" type="number" min="1" max="20" placeholder="1"></div>
+  </div>
+  <div class="form-section-title">🏢 Agencia</div>
+  <div class="form-group"><label>Agencia que asignó el servicio</label><input id="f-agencia" type="text" placeholder="Ej. Viajes América..."></div>
+  <div class="form-section-title">✈️ Vuelo</div>
+  <div class="form-row">
+    <div class="form-group"><label>Número de vuelo</label><input id="f-vuelo" type="text" placeholder="Ej. AM 456"></div>
+    <div class="form-group"><label>Tipo</label><select id="f-tipo-vuelo"><option value="">— Sin vuelo —</option><option value="llegada">Llegada</option><option value="salida">Salida</option></select></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>Hora de vuelo</label><input id="f-hora-vuelo" type="time"></div>
+    <div class="form-group"><label>Aerolínea</label><input id="f-aerolinea" type="text" placeholder="Ej. Aeroméxico"></div>
+  </div>
+  <div class="form-section-title">🗓️ Servicio</div>
+  <div class="form-row">
+    <div class="form-group"><label>Fecha *</label><input id="f-fecha" type="date"></div>
+    <div class="form-group"><label>Hora de recogida</label><input id="f-hora" type="time"></div>
+  </div>
+  <div class="form-group"><label>Origen</label><input id="f-origen" type="text" placeholder="Ej. Aeropuerto"></div>
+  <div class="form-group"><label>Destino</label><input id="f-destino" type="text" placeholder="Ej. Hotel El Fuerte"></div>
+  <div class="form-group"><label>Notas</label><textarea id="f-desc" placeholder="Equipaje, instrucciones especiales..."></textarea></div>
+  <div class="form-group"><label>Estatus</label><select id="f-estatus"><option value="pendiente">Pendiente</option><option value="realizado">Realizado</option><option value="cancelado">Cancelado</option></select></div>
+  <button class="btn-submit" onclick="addService()">Agendar Servicio</button>`;}
+
+function renderList(){
+  let filtered=services.slice().sort((a,b)=>a.fecha.localeCompare(b.fecha));
+  if(activeFilter!=='todos')filtered=filtered.filter(s=>s.estatus===activeFilter);
+  const counts={pendiente:services.filter(s=>s.estatus==='pendiente').length,realizado:services.filter(s=>s.estatus==='realizado').length,cancelado:services.filter(s=>s.estatus==='cancelado').length};
+  let html=`<div class="stats-row">
+    <div class="stat-card"><span class="stat-num" style="color:var(--accent)">${counts.pendiente}</span><span class="stat-label">Pendientes</span></div>
+    <div class="stat-card"><span class="stat-num" style="color:var(--green)">${counts.realizado}</span><span class="stat-label">Realizados</span></div>
+    <div class="stat-card"><span class="stat-num" style="color:var(--red)">${counts.cancelado}</span><span class="stat-label">Cancelados</span></div>
+  </div>
+  <div class="filter-bar">
+    <button class="filter-btn ${activeFilter==='todos'?'active':''}" onclick="setFilter('todos')">Todos (${services.length})</button>
+    <button class="filter-btn ${activeFilter==='pendiente'?'active':''}" onclick="setFilter('pendiente')">Pendientes</button>
+    <button class="filter-btn ${activeFilter==='realizado'?'active':''}" onclick="setFilter('realizado')">Realizados</button>
+    <button class="filter-btn ${activeFilter==='cancelado'?'active':''}" onclick="setFilter('cancelado')">Cancelados</button>
+  </div>`;
+  if(!filtered.length){html+=`<div class="empty-state">No hay servicios<br><span style="font-size:.72rem">Agrega uno con el botón superior</span></div>`;return html;}
+  filtered.forEach(s=>{
+    const fechaDisp=s.fecha?new Date(s.fecha+'T12:00:00').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'}):'—';
+    const tipoIcon=s.tipoVuelo==='llegada'?'🛬 ':s.tipoVuelo==='salida'?'🛫 ':'';
+    html+=`<div class="service-card">
+      <div class="sc-top">
+        <div class="sc-client">${s.cliente}</div>
+        <button class="status-badge ${s.estatus}" onclick="openStatusPicker('${s.id}',event)">${s.estatus}</button>
+      </div>
+      <div class="sc-date">${fechaDisp}${s.hora?' · '+s.hora:''}</div>
+      <div class="sc-meta">
+        ${s.agencia?`<span class="sc-tag agencia">🏢 ${s.agencia}</span>`:''}
+        ${s.vuelo?`<span class="sc-tag vuelo">${tipoIcon}${s.vuelo}</span>`:''}
+        ${s.unidad?`<span class="sc-tag unidad">🚗 ${s.unidad}</span>`:''}
+      </div>
+      ${s.origen||s.destino?`<div class="sc-row">📍 ${s.origen||'?'} → ${s.destino||'?'}</div>`:''}
+      ${s.desc?`<div class="sc-row">💬 ${s.desc}</div>`:''}
+      <div class="sc-actions">
+        <button class="sc-btn banner" onclick="abrirBanner('${s.id}')">🖨️ Banner</button>
+        <button class="sc-btn del" onclick="deleteService('${s.id}')">🗑 Eliminar</button>
+      </div>
+    </div>`;
+  });
+  return html;
+}
+
+function setFilter(f){activeFilter=f;renderSide();}
+
+async function addService(){
+  const cliente=document.getElementById('f-cliente').value.trim();
+  const fecha=document.getElementById('f-fecha').value;
+  if(!cliente){alert('El nombre del cliente es requerido.');return;}
+  if(!fecha){alert('La fecha es requerida.');return;}
+  const data={
+    cliente,
+    telefono: document.getElementById('f-telefono').value.trim(),
+    pasajeros: document.getElementById('f-pasajeros').value||null,
+    agencia: document.getElementById('f-agencia').value.trim(),
+    vuelo: document.getElementById('f-vuelo').value.trim(),
+    tipo_vuelo: document.getElementById('f-tipo-vuelo').value,
+    hora_vuelo: document.getElementById('f-hora-vuelo').value||null,
+    aerolinea: document.getElementById('f-aerolinea').value.trim(),
+    fecha,
+    hora: document.getElementById('f-hora').value||null,
+    origen: document.getElementById('f-origen').value.trim(),
+    destino: document.getElementById('f-destino').value.trim(),
+    notas: document.getElementById('f-desc').value.trim(),
+    estatus: document.getElementById('f-estatus').value,
+    unidad: ''
+  };
+  setLoading(true);
+  try{
+    const [newRow] = await supa.post('servicios', data);
+    const newS = {id:newRow.id, cliente:newRow.cliente, telefono:newRow.telefono||'', pasajeros:newRow.pasajeros||'', agencia:newRow.agencia||'', vuelo:newRow.vuelo||'', tipoVuelo:newRow.tipo_vuelo||'', horaVuelo:newRow.hora_vuelo||'', aerolinea:newRow.aerolinea||'', fecha:newRow.fecha, hora:newRow.hora||'', origen:newRow.origen||'', destino:newRow.destino||'', desc:newRow.notas||'', estatus:newRow.estatus, unidad:''};
+    services.unshift(newS);
+    renderCalendar(); switchTab('lista');
+    toast('Servicio agendado ✓','ok');
+    setTimeout(()=>abrirBanner(newS.id),200);
+  }catch(e){
+    toast('Error al guardar: '+e.message,'err');
+  }
+  setLoading(false);
+}
+
+async function deleteService(id){
+  if(!confirm('¿Eliminar este servicio?'))return;
+  setLoading(true);
+  try{
+    await supa.del('servicios',`id=eq.${id}`);
+    services=services.filter(s=>s.id!==id);
+    renderCalendar(); renderSide();
+    toast('Servicio eliminado','info');
+  }catch(e){
+    toast('Error al eliminar','err');
+  }
+  setLoading(false);
+}
+
+function abrirBanner(id){
+  bannerServiceId=id;const s=services.find(x=>x.id===id);if(!s)return;
+  document.getElementById('bp-name').textContent=(s.cliente||'').toUpperCase();
+  const lines=[];
+  if(s.agencia)lines.push('Agencia: '+s.agencia);
+  if(s.pasajeros)lines.push('Pasajeros: '+s.pasajeros);
+  const tv=s.tipoVuelo==='llegada'?'Llegada ':s.tipoVuelo==='salida'?'Salida ':'';
+  if(s.vuelo)lines.push('Vuelo: '+tv+s.vuelo+(s.aerolinea?' · '+s.aerolinea:''));
+  if(s.origen||s.destino)lines.push('Trayecto: '+(s.origen||'?')+' → '+(s.destino||'?'));
+  document.getElementById('bp-footer').innerHTML=lines.join('<br>')||'Sin información adicional';
+  document.getElementById('bannerPopup').style.display='flex';
+}
+function cerrarBanner(){document.getElementById('bannerPopup').style.display='none';bannerServiceId=null;}
+
+function generarBannerPDF(){
+  const s=services.find(x=>x.id===bannerServiceId);if(!s)return;
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+  const W=297,H=210,margen=12;
+  doc.setFillColor(255,255,255);doc.rect(0,0,W,H,'F');
+  doc.setDrawColor(0,0,0);doc.setLineWidth(8);doc.rect(margen,margen,W-(margen*2),H-(margen*2),'S');
+  const tv=s.tipoVuelo==='llegada'?'Llegada ':s.tipoVuelo==='salida'?'Salida ':'';
+  const footerLines=[];
+  if(s.agencia)footerLines.push('Agencia: '+s.agencia);
+  if(s.pasajeros)footerLines.push('Pasajeros: '+s.pasajeros);
+  if(s.vuelo)footerLines.push('Vuelo: '+tv+s.vuelo+(s.aerolinea?' · '+s.aerolinea:''));
+  if(s.origen||s.destino)footerLines.push('Trayecto: '+(s.origen||'?')+' -> '+(s.destino||'?'));
+  const footerLineH=6,footerTotalH=footerLines.length*footerLineH;
+  const footerStartY=H-margen-8-footerTotalH;
+  doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(60,60,60);
+  footerLines.forEach((line,i)=>doc.text(line,margen+10,footerStartY+(i*footerLineH)));
+  const zonaTop=margen+8,zonaBottom=footerStartY-8,zonaCentro=zonaTop+(zonaBottom-zonaTop)/2;
+  doc.setTextColor(0,0,0);doc.setFont('helvetica','bold');doc.setFontSize(72);
+  doc.text('BIENVENIDOS',W/2,zonaCentro-10,{align:'center'});
+  doc.setLineWidth(1.5);doc.setDrawColor(0,0,0);doc.line(50,zonaCentro+2,W-50,zonaCentro+2);
+  doc.setFontSize(40);doc.text((s.cliente||'').toUpperCase(),W/2,zonaCentro+20,{align:'center'});
+  doc.save('banner_'+(s.cliente||'servicio').replace(/\s+/g,'_').toLowerCase()+'.pdf');
+  cerrarBanner();
+}
+
+function openStatusPicker(id,event){
+  event.stopPropagation();statusTargetId=id;
+  const picker=document.getElementById('statusPicker');picker.style.display='block';
+  const rect=event.target.getBoundingClientRect();
+  picker.style.top=(rect.bottom+window.scrollY+4)+'px';
+  picker.style.left=Math.min(rect.left,window.innerWidth-170)+'px';
+}
+async function handleStatusSelect(newStatus){
+  document.getElementById('statusPicker').style.display='none';
+  if(newStatus==='realizado'){abrirModalUnidad();}
+  else{
+    const s=services.find(x=>x.id===statusTargetId);
+    if(s){
+      setLoading(true);
+      try{
+        await supa.patch('servicios',`id=eq.${s.id}`,{estatus:newStatus});
+        s.estatus=newStatus;
+        renderCalendar();renderSide();
+        toast('Estatus actualizado','ok');
+      }catch(e){toast('Error al actualizar','err');}
+      setLoading(false);
+    }
+    statusTargetId=null;
+  }
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#statusPicker')&&!e.target.classList.contains('status-badge'))
+    document.getElementById('statusPicker').style.display='none';
+});
+function abrirModalUnidad(){
+  document.getElementById('unidadInput').value='';
+  const s=services.find(x=>x.id===statusTargetId);
+  document.getElementById('modalSubtitle').textContent=s?`Servicio: ${s.cliente}`:'';
+  const grid=document.getElementById('unidadesGrid');grid.innerHTML='';
+  unidades.forEach(u=>{
+    const btn=document.createElement('button');btn.className='unidad-btn';btn.id='ubtn-'+u.id;
+    btn.innerHTML=`<span class="u-icon">${u.icon}</span><span class="u-name">${u.nombre}</span><span class="u-plates">${u.placas}</span>`;
+    btn.onclick=()=>{document.querySelectorAll('.unidad-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');document.getElementById('unidadInput').value=u.nombre+' · '+u.placas;};
+    grid.appendChild(btn);
+  });
+  document.getElementById('modalUnidad').style.display='flex';
+}
+function cerrarModalUnidad(){document.getElementById('modalUnidad').style.display='none';statusTargetId=null;}
+async function confirmarRealizado(){
+  const inputVal=document.getElementById('unidadInput').value.trim();
+  if(!inputVal){alert('Por favor indica qué unidad realizó el servicio.');return;}
+  const s=services.find(x=>x.id===statusTargetId);
+  if(s){
+    setLoading(true);
+    try{
+      await supa.patch('servicios',`id=eq.${s.id}`,{estatus:'realizado',unidad:inputVal});
+      s.estatus='realizado';s.unidad=inputVal;
+      document.getElementById('modalUnidad').style.display='none';
+      statusTargetId=null;renderCalendar();renderSide();
+      toast('Servicio marcado como realizado ✓','ok');
+    }catch(e){toast('Error al actualizar','err');}
+    setLoading(false);
+  }
+}
+
+/* ════════════════════════════════════
+   CRÉDITOS
+════════════════════════════════════ */
+const CRED_EMPRESA=EMPRESA;
+const UNIDADES_TAXI=Array.from({length:20},(_,i)=>`Taxi ${String(i+1).padStart(2,'00')}`);
+let cClientes=[],cCreditos=[];
+let cPagoModal=null,cSelIds=[],cModoLibre=false,cSoloPend=false;
+let cTabActual='cclientes',cFilCli='',cFilUni='';
+
+const cfmt=n=>'$'+parseFloat(n).toFixed(2);
+const cfmtDate=s=>s?s.split('-').reverse().join('/'):'—';
+const cToday=()=>new Date().toISOString().split('T')[0];
+const cFechaLarga=()=>new Date().toLocaleDateString('es-MX',{year:'numeric',month:'long',day:'numeric'});
+const cGetStatus=c=>c.pagado>=c.monto?'pagado':c.pagado>0?'parcial':'pendiente';
+const cPend=c=>parseFloat((c.monto-c.pagado).toFixed(2));
+
+async function loadClientes(){
+  const rows = await supa.get('clientes','select=*&order=nombre.asc');
+  cClientes = rows.map(r=>({id:r.id, codigo:r.codigo, nombre:r.nombre, tel:r.tel||'', nota:r.nota||''}));
+}
+
+async function loadCreditos(){
+  const rows = await supa.get('creditos','select=*&order=fecha.desc');
+  cCreditos = rows.map(r=>({
+    id: r.id,
+    codigo: r.codigo,
+    cliente: r.cliente,
+    monto: parseFloat(r.monto)||0,
+    pagado: parseFloat(r.pagado)||0,
+    fecha: r.fecha||'',
+    unidad: r.unidad||'',
+    pagos: r.pagos||[]
+  }));
+}
+
+function cbadge(st){const m={pagado:'cbadge-ok Pagado',parcial:'cbadge-low Parcial',pendiente:'cbadge-red Pendiente'};const[cls,lbl]=(m[st]||m.pendiente).split(' ');return`<span class="cbadge ${cls}">${lbl}</span>`;}
+function cCodBadge(cod){return`<span class="cbadge cbadge-blue">${cod}</span>`;}
+
+function cShowTab(tab, btn){
+  cTabActual=tab;
+  document.querySelectorAll('.ctab').forEach(t=>t.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  document.querySelectorAll('.cpage').forEach(p=>{p.style.display='none';p.classList.remove('active');});
+  const el=document.getElementById('cTab-'+tab);
+  el.style.display='block';el.classList.add('active');
+  cRenderTab(tab);
+}
+
+function cRenderAll(){cRenderTab(cTabActual);}
+function cRenderTab(tab){
+  if(tab==='cclientes')cRenderClientes();
+  else if(tab==='ccreditos')cRenderCreditos();
+  else if(tab==='cporcliente')cRenderPorCliente();
+  else if(tab==='cporunidad')cRenderPorUnidad();
+}
+
+// ── Clientes ──
+function cRenderClientes(){
+  const el=document.getElementById('cTab-cclientes');
+  el.innerHTML=`
+  <div class="metrics c2" style="margin-bottom:12px">
+    <div class="metric"><div class="metric-label">Clientes registrados</div><div class="metric-value">${cClientes.length}</div></div>
+    <div class="metric"><div class="metric-label">&nbsp;</div><div class="metric-value">&nbsp;</div></div>
+  </div>
+  <div class="form-box">
+    <div class="cg5">
+      <div class="fg"><label>Código</label><input id="cf-cod" placeholder="CLI01" maxlength="10" oninput="this.value=this.value.toUpperCase()"></div>
+      <div class="fg"><label>Nombre completo</label><input id="cf-nom" placeholder="Nombre del cliente"></div>
+      <div class="fg"><label>Teléfono</label><input id="cf-tel" placeholder="Opcional"></div>
+      <div class="fg"><label>Nota</label><input id="cf-nota" placeholder="Empresa, ruta..."></div>
+      <div style="display:flex;flex-direction:column;justify-content:flex-end"><button class="cbtn cbtn-blue" onclick="cAgregarCliente()">+ Agregar</button></div>
+    </div>
+    <div class="cerr" id="cf-err"></div>
+  </div>
+  <div class="ctbl-wrap"><table class="ctbl">
+    <thead><tr><th>Código</th><th>Nombre</th><th>Teléfono</th><th>Nota</th><th>Acción</th></tr></thead>
+    <tbody>${cClientes.length?cClientes.map(c=>`<tr>
+      <td>${cCodBadge(c.codigo)}</td><td style="font-weight:600">${c.nombre}</td>
+      <td style="color:#666">${c.tel||'—'}</td><td style="color:#666">${c.nota||'—'}</td>
+      <td><button class="cbtn-or" onclick="cEliminarCliente('${c.id}')">✕ Eliminar</button></td>
+    </tr>`).join(''):'<tr><td colspan="5" style="text-align:center;color:#aaa;padding:2rem">Aún no hay clientes.</td></tr>'}</tbody>
+  </table></div>`;
+}
+
+async function cAgregarCliente(){
+  const cod=document.getElementById('cf-cod').value.trim().toUpperCase();
+  const nom=document.getElementById('cf-nom').value.trim();
+  const tel=document.getElementById('cf-tel').value.trim();
+  const nota=document.getElementById('cf-nota').value.trim();
+  const err=document.getElementById('cf-err');
+  if(!cod){err.textContent='Ingresa un código.';return;}
+  if(cClientes.find(c=>c.codigo===cod)){err.textContent='Ese código ya existe.';return;}
+  if(!nom){err.textContent='Ingresa el nombre.';return;}
+  err.textContent='';
+  setLoading(true);
+  try{
+    const [row] = await supa.post('clientes',{codigo:cod,nombre:nom,tel,nota});
+    cClientes.push({id:row.id,codigo:row.codigo,nombre:row.nombre,tel:row.tel||'',nota:row.nota||''});
+    document.getElementById('cf-cod').value='';document.getElementById('cf-nom').value='';
+    document.getElementById('cf-tel').value='';document.getElementById('cf-nota').value='';
+    cRenderClientes();
+    toast('Cliente registrado ✓','ok');
+  }catch(e){
+    err.textContent='Error al guardar: '+e.message;
+    toast('Error al guardar cliente','err');
+  }
+  setLoading(false);
+}
+
+async function cEliminarCliente(id){
+  if(!confirm('¿Eliminar este cliente?'))return;
+  setLoading(true);
+  try{
+    await supa.del('clientes',`id=eq.${id}`);
+    cClientes=cClientes.filter(c=>c.id!==id);
+    cRenderClientes();
+    toast('Cliente eliminado','info');
+  }catch(e){toast('Error al eliminar','err');}
+  setLoading(false);
+}
+
+// ── Créditos ──
+function cRenderCreditos(q=''){
+  const pend=cCreditos.reduce((s,c)=>s+Math.max(0,cPend(c)),0);
+  const filtrados=q?cCreditos.filter(c=>c.codigo.toLowerCase().includes(q.toLowerCase())||c.cliente.toLowerCase().includes(q.toLowerCase())||c.unidad.toLowerCase().includes(q.toLowerCase())):cCreditos;
+  const el=document.getElementById('cTab-ccreditos');
+  el.innerHTML=`
+  <div class="metrics c2" style="margin-bottom:12px">
+    <div class="metric"><div class="metric-label">Total crédito pendiente</div><div class="metric-value red">${cfmt(pend)}</div></div>
+    <div class="metric"><div class="metric-label">Servicios registrados</div><div class="metric-value">${cCreditos.length}</div></div>
+  </div>
+  <div class="form-box">
+    <div class="cg6">
+      <div class="fg"><label>Código de cliente</label><select id="cv-cod" onchange="cOnCliSel()">
+        <option value="">— Selecciona —</option>
+        ${cClientes.map(c=>`<option value="${c.codigo}">${c.codigo} · ${c.nombre}</option>`).join('')}
+      </select></div>
+      <div id="cv-name-box" style="display:flex;align-items:flex-end;padding-bottom:1px"><span id="cv-name" style="font-size:12px;color:#666"></span></div>
+      <div class="fg"><label>Monto ($)</label><input id="cv-monto" type="number" placeholder="0.00" min="0" step="0.01"></div>
+      <div class="fg"><label>Fecha del servicio</label><input id="cv-fecha" type="date" value="${cToday()}"></div>
+      <div class="fg"><label>Unidad</label><select id="cv-unidad">
+        <option value="">— Selecciona —</option>
+        ${UNIDADES_TAXI.map(u=>`<option value="${u}">${u}</option>`).join('')}
+      </select></div>
+      <div style="display:flex;flex-direction:column;justify-content:flex-end"><button class="cbtn cbtn-blue" onclick="cAgregarCredito()">+ Registrar</button></div>
+    </div>
+    <div class="cerr" id="cv-err"></div>
+    ${cClientes.length===0?'<div class="cwarn">Primero registra clientes en la pestaña Clientes.</div>':''}
+  </div>
+  <div class="cflex"><input style="max-width:280px;padding:6px 8px;font-size:13px;border:1px solid #ccc;border-radius:5px;" placeholder="Buscar..." oninput="cRenderCreditos(this.value)" value="${q}"></div>
+  <div class="ctbl-wrap"><table class="ctbl">
+    <thead><tr><th>#</th><th>Código</th><th>Cliente</th><th>Fecha</th><th>Unidad</th><th>Monto</th><th>Pagado</th><th>Pendiente</th><th>Estado</th><th>Acciones</th></tr></thead>
+    <tbody>${filtrados.length?filtrados.map((c,i)=>{
+      const p=cPend(c),st=cGetStatus(c);
+      return`<tr>
+        <td style="color:#aaa">${i+1}</td><td>${cCodBadge(c.codigo)}</td>
+        <td style="font-weight:600">${c.cliente}</td>
+        <td style="color:#666;white-space:nowrap">${cfmtDate(c.fecha)}</td>
+        <td style="color:#666">${c.unidad}</td>
+        <td>${cfmt(c.monto)}</td><td style="color:#3B6D11">${cfmt(c.pagado)}</td>
+        <td style="color:${p>0?'#c0392b':'#aaa'};font-weight:${p>0?600:400}">${cfmt(p)}</td>
+        <td>${cbadge(st)}</td>
+        <td><div style="display:flex;gap:4px;flex-wrap:wrap">
+          ${p>0?`<button class="cbtn-og" onclick="cAbrirPago('${c.codigo}')">Abonar</button>`:''}
+          ${st==='pagado'?`<button class="cbtn-oo" onclick="cPdfHistorialUno('${c.id}')">PDF</button>`:''}
+          <button class="cbtn-or" onclick="cEliminarCredito('${c.id}')">✕</button>
+        </div></td>
+      </tr>`;
+    }).join(''):`<tr><td colspan="10" style="text-align:center;color:#aaa;padding:2rem">${cCreditos.length===0?'Aún no hay créditos.':'Sin resultados.'}</td></tr>`}</tbody>
+  </table></div>`;
+}
+
+function cOnCliSel(){
+  const cod=document.getElementById('cv-cod')?.value;
+  const cli=cClientes.find(c=>c.codigo===cod);
+  const el=document.getElementById('cv-name');
+  if(el)el.innerHTML=cli?`Cliente: <b style="color:#111">${cli.nombre}</b>`:'';
+}
+
+async function cAgregarCredito(){
+  const cod=document.getElementById('cv-cod').value;
+  const monto=parseFloat(document.getElementById('cv-monto').value);
+  const fecha=document.getElementById('cv-fecha').value;
+  const unidad=document.getElementById('cv-unidad').value;
+  const err=document.getElementById('cv-err');
+  if(!cod){err.textContent='Selecciona un cliente.';return;}
+  if(isNaN(monto)||monto<=0){err.textContent='Ingresa un monto válido.';return;}
+  if(!fecha){err.textContent='Selecciona una fecha.';return;}
+  if(!unidad){err.textContent='Selecciona la unidad.';return;}
+  err.textContent='';
+  const cli=cClientes.find(c=>c.codigo===cod);
+  setLoading(true);
+  try{
+    const [row] = await supa.post('creditos',{codigo:cli.codigo,cliente:cli.nombre,monto,pagado:0,fecha,unidad,pagos:[]});
+    cCreditos.unshift({id:row.id,codigo:row.codigo,cliente:row.cliente,monto:parseFloat(row.monto),pagado:0,fecha:row.fecha,unidad:row.unidad,pagos:[]});
+    document.getElementById('cv-monto').value='';
+    document.getElementById('cv-fecha').value=cToday();
+    document.getElementById('cv-unidad').value='';
+    cRenderCreditos();
+    toast('Crédito registrado ✓','ok');
+  }catch(e){
+    err.textContent='Error: '+e.message;
+    toast('Error al guardar crédito','err');
+  }
+  setLoading(false);
+}
+
+async function cEliminarCredito(id){
+  if(!confirm('¿Eliminar este crédito?'))return;
+  setLoading(true);
+  try{
+    await supa.del('creditos',`id=eq.${id}`);
+    cCreditos=cCreditos.filter(x=>x.id!==id);
+    cRenderAll();
+    toast('Crédito eliminado','info');
+  }catch(e){toast('Error al eliminar','err');}
+  setLoading(false);
+}
+
+// ── Por cliente ──
+function cPorClienteData(){
+  const map={};
+  cCreditos.forEach(c=>{
+    if(!map[c.codigo])map[c.codigo]={codigo:c.codigo,cliente:c.cliente,total:0,pagado:0,servicios:0};
+    map[c.codigo].total+=c.monto;map[c.codigo].pagado+=c.pagado;map[c.codigo].servicios++;
+  });
+  return Object.values(map).sort((a,b)=>(b.total-b.pagado)-(a.total-a.pagado));
+}
+
+function cRenderPorCliente(){
+  const data=cPorClienteData();
+  const totalPend=cCreditos.reduce((s,c)=>s+Math.max(0,cPend(c)),0);
+  const el=document.getElementById('cTab-cporcliente');
+  const selectOpts='<option value="">— Todos los clientes —</option>'+data.map(c=>`<option value="${c.codigo}" ${cFilCli===c.codigo?'selected':''}>${c.codigo} · ${c.cliente}</option>`).join('');
+  el.innerHTML=`
+  <div class="metrics c2" style="margin-bottom:12px">
+    <div class="metric"><div class="metric-label">Clientes con crédito pendiente</div><div class="metric-value">${data.filter(c=>c.total-c.pagado>0).length}</div></div>
+    <div class="metric"><div class="metric-label">Total pendiente empresa</div><div class="metric-value red">${cfmt(totalPend)}</div></div>
+  </div>
+  <div class="cflex">
+    <select style="max-width:260px;padding:6px 8px;font-size:13px;border:1px solid #ccc;border-radius:5px;" onchange="cFilCli=this.value;cSoloPend=false;cRenderPorCliente()">${selectOpts}</select>
+    ${cFilCli?`<button class="cbtn-ob" onclick="cFilCli='';cSoloPend=false;cRenderPorCliente()">✕ Limpiar</button>`:''}
+  </div>
+  ${!cFilCli?`<div class="ctbl-wrap"><table class="ctbl">
+    <thead><tr><th>Código</th><th>Cliente</th><th>Servicios</th><th>Total crédito</th><th>Cobrado</th><th>Pendiente</th><th>Estado</th><th>Ver</th></tr></thead>
+    <tbody>${data.length?data.map(c=>{const p=c.total-c.pagado;const st=p<=0?'pagado':c.pagado>0?'parcial':'pendiente';return`<tr>
+      <td>${cCodBadge(c.codigo)}</td><td style="font-weight:600">${c.cliente}</td><td style="text-align:center">${c.servicios}</td>
+      <td>${cfmt(c.total)}</td><td style="color:#3B6D11">${cfmt(c.pagado)}</td>
+      <td style="color:${p>0?'#c0392b':'#aaa'};font-weight:${p>0?600:400}">${cfmt(p)}</td>
+      <td>${cbadge(st)}</td>
+      <td><button class="cbtn-ob" onclick="cFilCli='${c.codigo}';cRenderPorCliente()">Ver</button></td>
+    </tr>`;}).join(''):'<tr><td colspan="8" style="text-align:center;color:#aaa;padding:2rem">Sin datos.</td></tr>'}</tbody>
+  </table></div>`:'<div id="cCliContent"></div>'}`;
+  if(cFilCli) cRenderCliDetalle(cFilCli);
+}
+
+function cRenderCliDetalle(cod){
+  const cliInfo=cClientes.find(c=>c.codigo===cod);
+  const credsC=cCreditos.filter(c=>c.codigo===cod);
+  const pends=credsC.filter(c=>cPend(c)>0);
+  const pags=credsC.filter(c=>cGetStatus(c)==='pagado');
+  const pendC=pends.reduce((s,c)=>s+cPend(c),0);
+  const mostrar=cSoloPend?pends:credsC;
+  const el=document.getElementById('cCliContent');
+  if(!el)return;
+  el.innerHTML=`
+  <div class="metrics c2" style="margin-bottom:12px">
+    <div class="metric"><div class="metric-label">Servicios registrados</div><div class="metric-value">${credsC.length}</div></div>
+    <div class="metric"><div class="metric-label">Total pendiente</div><div class="metric-value red">${cfmt(pendC)}</div></div>
+  </div>
+  <div class="cflex">
+    <button class="cbtn ${cSoloPend?'cbtn-blue':'cbtn-gray'}" onclick="cSoloPend=!cSoloPend;cRenderCliDetalle('${cod}')">${cSoloPend?'Mostrar todos':'Solo pendientes'}</button>
+    ${pends.length?`<button class="cbtn-og" onclick="cAbrirPago('${cod}')">Registrar pago</button>`:''}
+    ${pends.length?`<button class="cbtn cbtn-orange" onclick="cPdfPendCli('${cod}')">PDF pendientes</button>`:''}
+    ${pags.length?`<button class="cbtn cbtn-green" onclick="cPdfHistCli('${cod}')">PDF historial pagos</button>`:''}
+  </div>
+  <div class="ctbl-wrap"><table class="ctbl">
+    <thead><tr><th>#</th><th>Fecha</th><th>Unidad</th><th>Monto</th><th>Pagado</th><th>Pendiente</th><th>Estado</th><th>Acción</th></tr></thead>
+    <tbody>${mostrar.length?mostrar.map((c,i)=>{const p=cPend(c),st=cGetStatus(c);return`<tr>
+      <td style="color:#aaa">${i+1}</td>
+      <td style="color:#666;white-space:nowrap">${cfmtDate(c.fecha)}</td>
+      <td style="color:#666">${c.unidad}</td>
+      <td>${cfmt(c.monto)}</td><td style="color:#3B6D11">${cfmt(c.pagado)}</td>
+      <td style="color:${p>0?'#c0392b':'#aaa'};font-weight:${p>0?600:400}">${cfmt(p)}</td>
+      <td>${cbadge(st)}</td>
+      <td><div style="display:flex;gap:4px">
+        ${st==='pagado'?`<button class="cbtn-oo" onclick="cPdfHistorialUno('${c.id}')">PDF</button>`:''}
+        <button class="cbtn-or" onclick="cEliminarCredito('${c.id}')">✕</button>
+      </div></td>
+    </tr>`;}).join(''):`<tr><td colspan="8" style="text-align:center;color:#aaa;padding:1.5rem">${cSoloPend?'Sin créditos pendientes.':'Sin servicios.'}</td></tr>`}
+    ${mostrar.length?`<tr style="background:#f5f5f5"><td colspan="5" style="font-weight:700">Total pendiente</td><td style="color:#c0392b;font-weight:700">${cfmt(pendC)}</td><td></td><td></td></tr>`:''}
+    </tbody>
+  </table></div>`;
+}
+
+// ── Por unidad ──
+function cPorUnidadData(){
+  const map={};
+  cCreditos.forEach(c=>{
+    if(!map[c.unidad])map[c.unidad]={unidad:c.unidad,total:0,pagado:0,servicios:0};
+    map[c.unidad].total+=c.monto;map[c.unidad].pagado+=c.pagado;map[c.unidad].servicios++;
+  });
+  return Object.values(map).sort((a,b)=>(b.total-b.pagado)-(a.total-a.pagado));
+}
+
+function cRenderPorUnidad(){
+  const data=cPorUnidadData();
+  const totalPend=cCreditos.reduce((s,c)=>s+Math.max(0,cPend(c)),0);
+  const el=document.getElementById('cTab-cporunidad');
+  const selectOpts='<option value="">— Todas las unidades —</option>'+data.map(u=>`<option value="${u.unidad}" ${cFilUni===u.unidad?'selected':''}>${u.unidad}</option>`).join('');
+  el.innerHTML=`
+  <div class="metrics c2" style="margin-bottom:12px">
+    <div class="metric"><div class="metric-label">Total crédito pendiente</div><div class="metric-value red">${cfmt(totalPend)}</div></div>
+    <div class="metric"><div class="metric-label">Unidades con créditos activos</div><div class="metric-value">${data.filter(u=>u.total-u.pagado>0).length}</div></div>
+  </div>
+  <div class="cflex">
+    <select style="max-width:220px;padding:6px 8px;font-size:13px;border:1px solid #ccc;border-radius:5px;" onchange="cFilUni=this.value;cRenderPorUnidad()">${selectOpts}</select>
+    ${cFilUni?`<button class="cbtn-ob" onclick="cFilUni='';cRenderPorUnidad()">✕ Limpiar</button>`:''}
+  </div>
+  <div id="cUniContent"></div>`;
+  if(!cFilUni) cRenderUniGeneral(data,totalPend);
+  else cRenderUniDetalle(cFilUni);
+}
+
+function cRenderUniGeneral(data,totalPend){
+  const el=document.getElementById('cUniContent');
+  if(!data.length){el.innerHTML='<div style="text-align:center;color:#aaa;padding:2rem">Aún no hay servicios.</div>';return;}
+  el.innerHTML=`<div class="ctbl-wrap"><table class="ctbl">
+    <thead><tr><th>Unidad</th><th>Servicios</th><th>Total crédito</th><th>Cobrado</th><th>Pendiente</th><th>Estado</th><th>Ver detalle</th></tr></thead>
+    <tbody>${data.map(u=>{const p=u.total-u.pagado;const st=p<=0?'pagado':u.pagado>0?'parcial':'pendiente';return`<tr>
+      <td style="font-weight:600">${u.unidad}</td><td style="text-align:center">${u.servicios}</td>
+      <td>${cfmt(u.total)}</td><td style="color:#3B6D11">${cfmt(u.pagado)}</td>
+      <td style="color:${p>0?'#c0392b':'#aaa'};font-weight:${p>0?600:400}">${cfmt(p)}</td>
+      <td>${cbadge(st)}</td>
+      <td><button class="cbtn-ob" onclick="cFilUni='${u.unidad}';cRenderPorUnidad()">Ver desglose</button></td>
+    </tr>`;}).join('')}</tbody>
+  </table></div>`;
+}
+
+function cRenderUniDetalle(unidad){
+  const credsU=cCreditos.filter(c=>c.unidad===unidad);
+  const pends=credsU.filter(c=>cPend(c)>0);
+  const pags=credsU.filter(c=>cGetStatus(c)==='pagado');
+  const pendU=pends.reduce((s,c)=>s+cPend(c),0);
+  const el=document.getElementById('cUniContent');
+  el.innerHTML=`
+  <div class="metrics c2" style="margin-bottom:12px">
+    <div class="metric"><div class="metric-label">Servicios registrados</div><div class="metric-value">${credsU.length}</div></div>
+    <div class="metric"><div class="metric-label">Pendiente</div><div class="metric-value red">${cfmt(pendU)}</div></div>
+  </div>
+  <div class="cflex">
+    ${pends.length?`<button class="cbtn cbtn-orange" onclick="cPdfPendUni('${unidad}')">PDF pendientes</button>`:''}
+    ${pags.length?`<button class="cbtn cbtn-green" onclick="cPdfPagUni('${unidad}')">PDF pagados</button>`:''}
+  </div>
+  <div class="ctitle">Créditos pendientes — ${unidad}</div>
+  <div class="ctbl-wrap" style="margin-bottom:16px"><table class="ctbl">
+    <thead><tr><th>Código</th><th>Cliente</th><th>Fecha</th><th>Monto</th><th>Pagado</th><th>Pendiente</th><th>Estado</th></tr></thead>
+    <tbody>${pends.length?pends.map(c=>`<tr>
+      <td>${cCodBadge(c.codigo)}</td><td style="font-weight:600">${c.cliente}</td>
+      <td style="color:#666;white-space:nowrap">${cfmtDate(c.fecha)}</td>
+      <td>${cfmt(c.monto)}</td><td style="color:#3B6D11">${cfmt(c.pagado)}</td>
+      <td style="color:#c0392b;font-weight:700">${cfmt(cPend(c))}</td>
+      <td>${cbadge(cGetStatus(c))}</td>
+    </tr>`).join(''):`<tr><td colspan="7" style="text-align:center;color:#aaa;padding:1.5rem">Sin créditos pendientes.</td></tr>`}
+    ${pends.length?`<tr style="background:#f5f5f5"><td colspan="5" style="font-weight:700">Total pendiente</td><td style="color:#c0392b;font-weight:700">${cfmt(pendU)}</td><td></td></tr>`:''}</tbody>
+  </table></div>
+  <div class="ctitle">Historial completo — ${unidad}</div>
+  <div class="ctbl-wrap"><table class="ctbl">
+    <thead><tr><th>Código</th><th>Cliente</th><th>Fecha</th><th>Monto</th><th>Pagado</th><th>Pendiente</th><th>Estado</th></tr></thead>
+    <tbody>${credsU.length?credsU.map(c=>{const p=cPend(c);return`<tr>
+      <td>${cCodBadge(c.codigo)}</td><td style="font-weight:600">${c.cliente}</td>
+      <td style="color:#666;white-space:nowrap">${cfmtDate(c.fecha)}</td>
+      <td>${cfmt(c.monto)}</td><td style="color:#3B6D11">${cfmt(c.pagado)}</td>
+      <td style="color:${p>0?'#c0392b':'#aaa'};font-weight:${p>0?600:400}">${cfmt(p)}</td>
+      <td>${cbadge(cGetStatus(c))}</td>
+    </tr>`;}).join(''):`<tr><td colspan="7" style="text-align:center;color:#aaa;padding:1.5rem">Sin servicios.</td></tr>`}</tbody>
+  </table></div>`;
+}
+
+// ── Modal pago ──
+function cAbrirPago(cod){
+  cPagoModal=cod;
+  const cli=cClientes.find(c=>c.codigo===cod);
+  const pends=cCreditos.filter(c=>c.codigo===cod&&cPend(c)>0);
+  cSelIds=pends.map(c=>c.id);cModoLibre=false;
+  document.getElementById('c-modal-sub').innerHTML=`<span class="cbadge cbadge-blue" style="margin-right:6px">${cod}</span>${cli?.nombre||''}`;
+  document.getElementById('c-pago-err').textContent='';
+  document.getElementById('c-monto-libre').value='';
+  document.getElementById('c-monto-libre-box').style.display='none';
+  document.getElementById('c-btn-completo').classList.add('active');
+  document.getElementById('c-btn-libre').classList.remove('active');
+  cRenderCheckList();
+  document.getElementById('c-modal-pago').style.display='flex';
+}
+function cRenderCheckList(){
+  const pends=cCreditos.filter(c=>c.codigo===cPagoModal&&cPend(c)>0);
+  const list=document.getElementById('c-check-list');
+  if(!pends.length){list.innerHTML='<div style="padding:12px;color:#aaa;font-size:13px">No hay servicios pendientes.</div>';cUpdateSelTotal();return;}
+  list.innerHTML=pends.map(c=>{const sel=cSelIds.includes(c.id);return`<div class="check-item ${sel?'sel':''}" onclick="cToggleSel('${c.id}')">
+    <div class="check-box ${sel?'sel':''}">${sel?'✓':''}</div>
+    <div class="check-info"><div class="check-name">${cfmtDate(c.fecha)} · ${c.unidad}</div></div>
+    <div class="check-amt">${cfmt(cPend(c))}</div>
+  </div>`;}).join('');
+  cUpdateSelTotal();
+}
+function cToggleSel(id){if(cSelIds.includes(id))cSelIds=cSelIds.filter(x=>x!==id);else cSelIds.push(id);cRenderCheckList();}
+function cUpdateSelTotal(){
+  const total=cCreditos.filter(c=>cSelIds.includes(c.id)).reduce((s,c)=>s+cPend(c),0);
+  document.getElementById('c-sel-count').textContent=`${cSelIds.length} servicio(s) seleccionado(s)`;
+  document.getElementById('c-sel-total').textContent=cfmt(total);
+  document.getElementById('c-monto-libre').placeholder=`Máx. ${cfmt(total)}`;
+}
+function cSetModo(libre){
+  cModoLibre=libre;
+  document.getElementById('c-btn-completo').classList.toggle('active',!libre);
+  document.getElementById('c-btn-libre').classList.toggle('active',libre);
+  document.getElementById('c-monto-libre-box').style.display=libre?'block':'none';
+}
+function cCerrarPago(){document.getElementById('c-modal-pago').style.display='none';cPagoModal=null;}
+
+async function cAplicarPago(){
+  const err=document.getElementById('c-pago-err');
+  if(!cSelIds.length){err.textContent='Selecciona al menos un servicio.';return;}
+  const totalSel=cCreditos.filter(c=>cSelIds.includes(c.id)).reduce((s,c)=>s+cPend(c),0);
+  let pagosActualizar=[];
+  if(cModoLibre){
+    const m=parseFloat(document.getElementById('c-monto-libre').value);
+    if(isNaN(m)||m<=0){err.textContent='Ingresa un monto válido.';return;}
+    if(m>totalSel+0.001){err.textContent=`Excede el total (${cfmt(totalSel)}).`;return;}
+    let restante=m;
+    cCreditos.forEach(c=>{
+      if(!cSelIds.includes(c.id)||restante<=0)return;
+      const p=cPend(c);const aplicar=Math.min(p,restante);
+      restante=parseFloat((restante-aplicar).toFixed(2));
+      const nuevoPagado=parseFloat((c.pagado+aplicar).toFixed(2));
+      const nuevosPagos=[...c.pagos,{monto:aplicar,fecha:cToday()}];
+      pagosActualizar.push({id:c.id,pagado:nuevoPagado,pagos:nuevosPagos});
+      c.pagado=nuevoPagado;c.pagos=nuevosPagos;
+    });
+  } else {
+    cCreditos.forEach(c=>{
+      if(!cSelIds.includes(c.id))return;
+      const nuevosPagos=[...c.pagos,{monto:cPend(c),fecha:cToday()}];
+      pagosActualizar.push({id:c.id,pagado:c.monto,pagos:nuevosPagos});
+      c.pagado=c.monto;c.pagos=nuevosPagos;
+    });
+  }
+  setLoading(true);
+  try{
+    await Promise.all(pagosActualizar.map(p=>supa.patch('creditos',`id=eq.${p.id}`,{pagado:p.pagado,pagos:p.pagos})));
+    cCerrarPago();cRenderAll();
+    toast('Pago registrado ✓','ok');
+  }catch(e){
+    err.textContent='Error al guardar: '+e.message;
+    toast('Error al aplicar pago','err');
+  }
+  setLoading(false);
+}
+
+// ── PDFs ──
+function cMostrarPDF(titulo,info,columnas,filas,total,totalLabel,nota){
+  const infoHTML=info.map(it=>`<div class="pdf-info-item"><label>${it.label}</label><span>${it.valor}</span></div>`).join('');
+  const colsHTML=columnas.map(c=>`<th class="${c.r?'r':''}">${c.label}</th>`).join('');
+  const filasHTML=filas.map((f,i)=>`<tr>${f.map((v,j)=>`<td class="${columnas[j].r?'r':''} ${columnas[j].red?'red':''}">${v}</td>`).join('')}</tr>`).join('');
+  const totalHTML=total!==undefined?`<tr class="pdf-total-row"><td colspan="${columnas.length-1}" style="font-weight:700;color:#111">${totalLabel||'Total'}</td><td class="r red">${total}</td></tr>`:'';
+  document.getElementById('pdf-body').innerHTML=`
+    <div class="pdf-header-box"><h1>${titulo}</h1><p>Generado el ${cFechaLarga()}</p></div>
+    ${info.length?`<div class="pdf-info-row">${infoHTML}</div>`:''}
+    <table class="pdf-tbl"><thead><tr>${colsHTML}</tr></thead><tbody>${filasHTML}${totalHTML}</tbody></table>
+    <div class="pdf-foot"><span>${nota}</span><span>Fecha: ${cFechaLarga()}</span></div>`;
+  document.getElementById('pdf-overlay').style.display='flex';
+}
+
+function cPdfPendCli(cod){
+  const cliInfo=cClientes.find(c=>c.codigo===cod);
+  const pends=cCreditos.filter(c=>c.codigo===cod&&cPend(c)>0);
+  const total=pends.reduce((s,c)=>s+cPend(c),0);
+  cMostrarPDF('Créditos pendientes',[{label:'Cliente',valor:cliInfo?.nombre||'—'},{label:'Código',valor:cod},...(cliInfo?.tel?[{label:'Teléfono',valor:cliInfo.tel}]:[])],[{label:'#'},{label:'Fecha'},{label:'Unidad'},{label:'Pendiente',r:true,red:true}],pends.map((c,i)=>[i+1,cfmtDate(c.fecha),c.unidad,cfmt(cPend(c))]),cfmt(total),'Total pendiente',`${pends.length} servicio(s) pendiente(s)`);
+}
+function cPdfHistCli(cod){
+  const cliInfo=cClientes.find(c=>c.codigo===cod);
+  const pags=cCreditos.filter(c=>c.codigo===cod&&cGetStatus(c)==='pagado');
+  const total=pags.reduce((s,c)=>s+c.monto,0);
+  cMostrarPDF('Historial de pagos',[{label:'Cliente',valor:cliInfo?.nombre||'—'},{label:'Código',valor:cod}],[{label:'#'},{label:'Fecha servicio'},{label:'Unidad'},{label:'Monto',r:true},{label:'Fecha pago'},{label:'Pagado',r:true}],pags.map((c,i)=>[i+1,cfmtDate(c.fecha),c.unidad,cfmt(c.monto),c.pagos.length?cfmtDate(c.pagos[c.pagos.length-1].fecha):'—',cfmt(c.pagado)]),cfmt(total),'Total cobrado',`${pags.length} servicio(s) pagado(s)`);
+}
+function cPdfHistorialUno(id){
+  const c=cCreditos.find(x=>x.id===id);if(!c)return;
+  cMostrarPDF('Historial de pago — servicio',[{label:'Cliente',valor:c.cliente},{label:'Código',valor:c.codigo},{label:'Unidad',valor:c.unidad}],[{label:'#'},{label:'Fecha servicio'},{label:'Monto',r:true},{label:'Fecha pago'},{label:'Pagado',r:true}],[[1,cfmtDate(c.fecha),cfmt(c.monto),c.pagos.length?cfmtDate(c.pagos[c.pagos.length-1].fecha):'—',cfmt(c.pagado)]],cfmt(c.monto),'Total cobrado','1 servicio pagado');
+}
+function cPdfPendUni(unidad){
+  const pends=cCreditos.filter(c=>c.unidad===unidad&&cPend(c)>0);
+  const total=pends.reduce((s,c)=>s+cPend(c),0);
+  cMostrarPDF(`Créditos pendientes — ${unidad}`,[{label:'Unidad',valor:unidad},{label:'Servicios pendientes',valor:pends.length}],[{label:'#'},{label:'Fecha'},{label:'Código'},{label:'Cliente'},{label:'Pendiente',r:true,red:true}],pends.map((c,i)=>[i+1,cfmtDate(c.fecha),c.codigo,c.cliente,cfmt(cPend(c))]),cfmt(total),'Total pendiente',`${pends.length} servicio(s) pendiente(s)`);
+}
+function cPdfPagUni(unidad){
+  const pags=cCreditos.filter(c=>c.unidad===unidad&&cGetStatus(c)==='pagado');
+  const total=pags.reduce((s,c)=>s+c.monto,0);
+  cMostrarPDF(`Servicios cobrados — ${unidad}`,[{label:'Unidad',valor:unidad},{label:'Servicios cobrados',valor:pags.length}],[{label:'#'},{label:'Fecha'},{label:'Código'},{label:'Cliente'},{label:'Cobrado',r:true}],pags.map((c,i)=>[i+1,cfmtDate(c.fecha),c.codigo,c.cliente,cfmt(c.pagado)]),cfmt(total),'Total cobrado',`${pags.length} servicio(s) pagado(s)`);
+}
+</script>
+</body>
+</html>
