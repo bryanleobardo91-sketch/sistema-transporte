@@ -344,10 +344,8 @@ table.pdf-tbl td.red{color:#c0392b;font-weight:700;}
   <div class="modal-box">
     <div class="modal-title">🚗 ¿Qué unidad realizó el servicio?</div>
     <div class="modal-sub" id="modalSubtitle"></div>
-    <span class="modal-label">Unidades registradas</span>
     <div class="unidades-grid" id="unidadesGrid"></div>
-    <div class="modal-divider">— o escribe una unidad —</div>
-    <div class="modal-input"><input id="unidadInput" type="text" placeholder="Ej. Suburban Blanca · ABC-123"></div>
+    <div class="modal-input"><input id="unidadInput" type="text" placeholder="Ej. Taxi 01, Taxi 12..."></div>
     <div class="modal-actions">
       <button class="modal-cancel" onclick="cerrarModalUnidad()">Cancelar</button>
       <button class="modal-confirm" onclick="confirmarRealizado()">✓ Confirmar</button>
@@ -792,14 +790,9 @@ function abrirModalUnidad(){
   document.getElementById('unidadInput').value='';
   const s=services.find(x=>x.id===statusTargetId);
   document.getElementById('modalSubtitle').textContent=s?`Servicio: ${s.cliente}`:'';
-  const grid=document.getElementById('unidadesGrid');grid.innerHTML='';
-  unidades.forEach(u=>{
-    const btn=document.createElement('button');btn.className='unidad-btn';btn.id='ubtn-'+u.id;
-    btn.innerHTML=`<span class="u-icon">${u.icon}</span><span class="u-name">${u.nombre}</span><span class="u-plates">${u.placas}</span>`;
-    btn.onclick=()=>{document.querySelectorAll('.unidad-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');document.getElementById('unidadInput').value=u.nombre+' · '+u.placas;};
-    grid.appendChild(btn);
-  });
+  document.getElementById('unidadesGrid').innerHTML='';
   document.getElementById('modalUnidad').style.display='flex';
+  setTimeout(()=>document.getElementById('unidadInput').focus(),100);
 }
 function cerrarModalUnidad(){document.getElementById('modalUnidad').style.display='none';statusTargetId=null;}
 async function confirmarRealizado(){
