@@ -314,6 +314,89 @@ table.pdf-tbl td.red{color:#c0392b;font-weight:700;}
 
   .login-box{padding:28px 20px;margin:16px;}
 }
+
+/* ══ GASOLINA ══ */
+.gas-wrap{max-width:900px;margin:0 auto;padding:20px;}
+.gas-header{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);flex-wrap:wrap;gap:8px;}
+.gas-header h2{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#059669;}
+.gas-tabs{display:flex;gap:4px;padding:12px 20px 0;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.gas-tab{padding:8px 18px;font-family:'Syne',sans-serif;font-size:.78rem;font-weight:700;color:var(--text2);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;text-transform:uppercase;letter-spacing:.05em;transition:all .15s;}
+.gas-tab.active{color:#059669;border-bottom-color:#059669;background:#f0fdf4;}
+.gas-section{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow);}
+.gas-section-title{font-family:'Syne',sans-serif;font-size:.75rem;font-weight:800;color:#059669;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid #bbf7d0;}
+.denom-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px;}
+.denom-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:14px 10px;text-align:center;}
+.denom-label{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:800;color:#059669;margin-bottom:10px;display:block;}
+.denom-row{display:flex;align-items:center;gap:6px;margin-bottom:6px;}
+.denom-row label{font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;width:48px;text-align:left;flex-shrink:0;}
+.denom-row input{flex:1;width:100%;padding:6px 8px;border:1.5px solid var(--border);border-radius:6px;font-size:.85rem;text-align:center;background:#fff;color:var(--text);outline:none;}
+.denom-row input:focus{border-color:#059669;box-shadow:0 0 0 2px rgba(5,150,105,.1);}
+.denom-total{font-size:.72rem;color:var(--text2);margin-top:6px;}
+.denom-total span{font-weight:700;color:#059669;}
+.gas-total-bar{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:10px;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.gas-total-bar .gt-label{font-family:'Syne',sans-serif;font-size:.82rem;font-weight:700;color:#065f46;}
+.gas-total-bar .gt-value{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:#059669;}
+.entrega-form{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.gas-btn{background:#059669;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;width:100%;margin-top:4px;}
+.gas-btn:hover{opacity:.88;}
+.gas-btn-danger{background:#dc2626;}
+.gas-btn-blue{background:#2563eb;}
+.entregas-list{display:flex;flex-direction:column;gap:8px;}
+.entrega-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:12px;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.ec-info{flex:1;min-width:0;}
+.ec-unidad{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:800;}
+.ec-detalle{font-size:.72rem;color:var(--text2);margin-top:2px;}
+.ec-monto{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:#059669;white-space:nowrap;}
+.ec-del{background:none;border:1.5px solid var(--border);border-radius:6px;padding:4px 8px;font-size:.7rem;color:var(--text2);cursor:pointer;}
+.ec-del:hover{border-color:#dc2626;color:#dc2626;}
+.cuadre-box{border-radius:12px;padding:20px;text-align:center;margin-top:8px;}
+.cuadre-box.ok{background:#d1fae5;border:2px solid #059669;}
+.cuadre-box.err{background:#fee2e2;border:2px solid #dc2626;}
+.cuadre-icon{font-size:2.5rem;display:block;margin-bottom:8px;}
+.cuadre-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:4px;}
+.cuadre-sub{font-size:.82rem;color:var(--text2);}
+.cuadre-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0;}
+.cn-item{background:rgba(255,255,255,.7);border-radius:8px;padding:10px;}
+.cn-label{font-size:.65rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px;}
+.cn-val{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;}
+.hist-card{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);}
+.hist-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;flex-wrap:wrap;}
+.hist-fecha{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:800;}
+.hist-persona{font-size:.75rem;color:var(--text2);}
+.hist-badge{font-size:.68rem;font-weight:700;padding:3px 10px;border-radius:20px;}
+.hist-badge.ok{background:#d1fae5;color:#065f46;}
+.hist-badge.err{background:#fee2e2;color:#991b1b;}
+.hist-nums{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:.72rem;}
+.hn-item{background:var(--surface2);border-radius:6px;padding:6px 8px;}
+.hn-label{color:var(--text2);font-weight:600;display:block;margin-bottom:2px;}
+.hn-val{font-family:'Syne',sans-serif;font-weight:800;font-size:.85rem;}
+.turno-activo-banner{background:#fef3c7;border:1.5px solid #d97706;border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.tab-banner-icon{font-size:1.4rem;}
+.tab-banner-info{flex:1;}
+.tab-banner-title{font-family:'Syne',sans-serif;font-size:.85rem;font-weight:800;color:#92400e;}
+.tab-banner-sub{font-size:.72rem;color:#b45309;}
+@media(max-width:768px){
+  .denom-grid{grid-template-columns:1fr 1fr;}
+  .entrega-form{grid-template-columns:1fr;}
+  .cuadre-nums{grid-template-columns:1fr 1fr;}
+  .hist-nums{grid-template-columns:1fr 1fr;}
+  .gas-wrap{padding:10px;}
+  .gas-tabs{padding:8px 10px 0;}
+  .gas-tab{padding:7px 10px;font-size:.7rem;}
+}
+
+.unidades-entregas-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px;}
+.ue-card{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:10px 8px;text-align:center;transition:border-color .15s;}
+.ue-card.tiene-entrega{border-color:#059669;background:#f0fdf4;}
+.ue-nombre{font-family:'Syne',sans-serif;font-size:.75rem;font-weight:800;color:var(--text);margin-bottom:4px;}
+.ue-monto-display{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:800;color:#059669;min-height:18px;margin-bottom:4px;}
+.ue-input{width:100%;padding:6px 4px;border:1.5px solid var(--border);border-radius:6px;font-size:.82rem;text-align:center;background:#fff;color:var(--text);outline:none;margin-bottom:5px;}
+.ue-input:focus{border-color:#059669;}
+.ue-add-btn{width:100%;background:#059669;color:#fff;border:none;border-radius:6px;padding:5px;font-size:.8rem;font-weight:700;cursor:pointer;}
+.ue-add-btn:hover{opacity:.85;}
+@media(max-width:768px){
+  .unidades-entregas-grid{grid-template-columns:repeat(2,1fr);}
+}
 </style>
 </head>
 <body>
@@ -342,6 +425,7 @@ table.pdf-tbl td.red{color:#c0392b;font-weight:700;}
     <div class="nav-tabs">
       <button class="nav-tab active" onclick="showModulo('servicios',this)">📅 Servicios</button>
       <button class="nav-tab" onclick="showModulo('creditos',this)">💳 Créditos</button>
+      <button class="nav-tab" onclick="showModulo('gasolina',this)">⛽ Gasolina</button>
     </div>
     <button class="nav-sync" id="syncBtn" onclick="syncAll()" title="Estado de conexión">
       <span class="sync-dot" id="syncDot"></span> Nube
@@ -392,6 +476,23 @@ table.pdf-tbl td.red{color:#c0392b;font-weight:700;}
       <div id="cTab-cporunidad" class="cpage"></div>
     </div>
   </div>
+
+  <!-- ══ MÓDULO GASOLINA ══ -->
+  <div id="mod-gasolina" class="modulo">
+    <div class="gas-header">
+      <h2>⛽ Control de Vales de Gasolina</h2>
+      <div id="gas-estado-badge"></div>
+    </div>
+    <div class="gas-tabs">
+      <button class="gas-tab active" id="gtab-turno" onclick="gShowTab('turno',this)">Turno actual</button>
+      <button class="gas-tab" id="gtab-historial" onclick="gShowTab('historial',this)">Historial</button>
+    </div>
+    <div class="gas-wrap">
+      <div id="gTab-turno"></div>
+      <div id="gTab-historial" style="display:none"></div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ══ SERVICIOS: POPUPS ══ -->
@@ -546,8 +647,8 @@ function cerrarSesion(){
 async function initApp(){
   setLoading(true);
   try {
-    await Promise.all([loadServices(), loadClientes(), loadCreditos()]);
-    renderCalendar(); renderSide(); cRenderAll();
+    await Promise.all([loadServices(), loadClientes(), loadCreditos(), loadGasolina()]);
+    renderCalendar(); renderSide(); cRenderAll(); if(gTabActual==='turno') gRenderTurno();
     setSyncStatus(true);
     toast('Datos cargados desde la nube ☁️','ok');
   } catch(e){
@@ -560,8 +661,8 @@ async function initApp(){
 async function syncAll(){
   setLoading(true);
   try{
-    await Promise.all([loadServices(), loadClientes(), loadCreditos()]);
-    renderCalendar(); renderSide(); cRenderAll();
+    await Promise.all([loadServices(), loadClientes(), loadCreditos(), loadGasolina()]);
+    renderCalendar(); renderSide(); cRenderAll(); if(gTabActual==='turno') gRenderTurno();
     setSyncStatus(true);
     toast('Sincronizado correctamente ✓','ok');
   }catch(e){
@@ -578,6 +679,7 @@ function showModulo(mod, btn){
   document.getElementById('mod-'+mod).classList.add('active');
   if(btn) btn.classList.add('active');
   if(mod==='creditos') cRenderAll();
+  if(mod==='gasolina'){gShowTab('turno',document.getElementById('gtab-turno'));}
 }
 
 /* ════════════════════════════════════
@@ -1370,6 +1472,521 @@ function cPdfPagUni(unidad){
   const pags=cCreditos.filter(c=>c.unidad===unidad&&cGetStatus(c)==='pagado');
   const total=pags.reduce((s,c)=>s+c.monto,0);
   cMostrarPDF(`Servicios cobrados — ${unidad}`,[{label:'Unidad',valor:unidad},{label:'Servicios cobrados',valor:pags.length}],[{label:'#'},{label:'Fecha'},{label:'Código'},{label:'Cliente'},{label:'Cobrado',r:true}],pags.map((c,i)=>[i+1,cfmtDate(c.fecha),c.codigo,c.cliente,cfmt(c.pagado)]),cfmt(total),'Total cobrado',`${pags.length} servicio(s) pagado(s)`);
+}
+
+
+/* ════════════════════════════════════
+   GASOLINA - CONTROL DE VALES
+════════════════════════════════════ */
+const RESPONSABLES = [
+  {nombre:'Yadira Villalba', pin:'3847'},
+  {nombre:'Angélica Quiroz', pin:'6219'},
+  {nombre:'Elizabeth',       pin:'5073'},
+];
+
+let gTurnoActivo = null;
+let gEntregas = [];
+let gHistorial = [];
+let gTabActual = 'turno';
+
+async function loadGasolina(){
+  try{
+    const activos = await supa.get('gas_turnos','select=*&estatus=eq.activo&order=created_at.desc&limit=1');
+    if(activos.length){
+      gTurnoActivo = activos[0];
+      gTurnoActivo.apertura = gTurnoActivo.apertura || {};
+      const ents = await supa.get('gas_entregas','select=*&turno_id=eq.'+gTurnoActivo.id+'&order=created_at.asc');
+      gEntregas = ents;
+    } else {
+      gTurnoActivo = null;
+      gEntregas = [];
+    }
+    const hist = await supa.get('gas_turnos','select=*&estatus=eq.cerrado&order=created_at.desc&limit=30');
+    gHistorial = hist;
+  }catch(e){ console.error('Error gasolina:',e); }
+}
+
+function gShowTab(tab, btn){
+  gTabActual = tab;
+  document.querySelectorAll('.gas-tab').forEach(t=>t.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  document.getElementById('gTab-turno').style.display = tab==='turno'?'block':'none';
+  document.getElementById('gTab-historial').style.display = tab==='historial'?'block':'none';
+  if(tab==='turno') gRenderTurno();
+  else gRenderHistorial();
+}
+
+function gRenderTurno(){
+  const el = document.getElementById('gTab-turno');
+  if(!gTurnoActivo) gRenderApertura(el);
+  else gRenderTurnoActivo(el);
+}
+
+const DENOMINACIONES = [160, 100, 80, 50];
+const VALES_POR_HOJA = 8;
+
+function gDenomGrid(prefijo, vals={}){
+  return `<div class="denom-grid">${DENOMINACIONES.map(d=>{
+    const k='d'+d;
+    const h=vals[k]?.hojas||0; const s=vals[k]?.sueltos||0;
+    const sub=(h*VALES_POR_HOJA+s)*d;
+    return `<div class="denom-card">
+      <span class="denom-label">$${d}</span>
+      <div class="denom-row"><label>Hojas</label><input type="number" min="0" id="${prefijo}_h_${d}" value="${h}" oninput="gActualizarGrid('${prefijo}')" placeholder="0" style="font-size:16px"></div>
+      <div class="denom-row"><label>Sueltos</label><input type="number" min="0" id="${prefijo}_s_${d}" value="${s}" oninput="gActualizarGrid('${prefijo}')" placeholder="0" style="font-size:16px"></div>
+      <div class="denom-total" id="${prefijo}_sub_${d}">= <span>$${sub.toLocaleString()}</span></div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function gActualizarGrid(prefijo){
+  let total=0;
+  DENOMINACIONES.forEach(d=>{
+    const h=parseInt(document.getElementById(prefijo+'_h_'+d)?.value)||0;
+    const s=parseInt(document.getElementById(prefijo+'_s_'+d)?.value)||0;
+    const sub=(h*VALES_POR_HOJA+s)*d; total+=sub;
+    const el=document.getElementById(prefijo+'_sub_'+d);
+    if(el) el.innerHTML=`= <span>$${sub.toLocaleString()}</span>`;
+  });
+  const tel=document.getElementById(prefijo+'_total');
+  if(tel) tel.textContent='$'+total.toLocaleString('es-MX',{minimumFractionDigits:2});
+  return total;
+}
+
+function gLeerGrid(prefijo){
+  const datos={}; let total=0;
+  DENOMINACIONES.forEach(d=>{
+    const h=parseInt(document.getElementById(prefijo+'_h_'+d)?.value)||0;
+    const s=parseInt(document.getElementById(prefijo+'_s_'+d)?.value)||0;
+    datos['d'+d]={hojas:h,sueltos:s};
+    total+=(h*VALES_POR_HOJA+s)*d;
+  });
+  return {datos, total};
+}
+
+function gRenderApertura(el){
+  el.innerHTML = `
+    <div class="gas-section">
+      <div class="gas-section-title">📋 Apertura de turno</div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label style="font-size:.72rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px">Responsable</label>
+        <select id="aper-responsable" style="width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;background:#fff;color:var(--text);outline:none;">
+          <option value="">— Selecciona quién abre —</option>
+          ${RESPONSABLES.map(r=>`<option value="${r.nombre}">${r.nombre}</option>`).join('')}
+        </select>
+      </div>
+      <div class="gas-section-title" style="margin-top:0">📦 Inventario inicial — hojas y vales sueltos</div>
+      ${gDenomGrid('aper')}
+      <div class="gas-total-bar">
+        <span class="gt-label">💰 Total inventario inicial</span>
+        <span class="gt-value" id="aper_total">$0</span>
+      </div>
+      <button class="gas-btn" style="margin-top:14px" onclick="gAbrirTurno()">✓ Registrar apertura e iniciar turno</button>
+    </div>`;
+}
+
+async function gAbrirTurno(){
+  const responsable = document.getElementById('aper-responsable').value;
+  if(!responsable){toast('Selecciona el responsable','err');return;}
+  const {datos, total} = gLeerGrid('aper');
+  if(total<=0){toast('Ingresa al menos un vale','err');return;}
+  pinSolicitar(responsable,'Abrir turno', ()=>_doAbrirTurno(responsable, datos, total));
+}
+async function _doAbrirTurno(responsable, datos, total){
+  const hoy = new Date().toISOString().split('T')[0];
+  const horaAhora = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  setLoading(true);
+  try{
+    const [row] = await supa.post('gas_turnos',{
+      fecha:hoy, hora_apertura:horaAhora, responsable,
+      apertura:datos, total_apertura:total, estatus:'activo'
+    });
+    gTurnoActivo = row;
+    gTurnoActivo.apertura = datos;
+    gEntregas = [];
+    gRenderTurno();
+    toast('Turno abierto correctamente ✓','ok');
+  }catch(e){toast('Error: '+e.message,'err');}
+  setLoading(false);
+}
+
+function gRenderTurnoActivo(el){
+  const totalAp = gTurnoActivo.total_apertura||0;
+  const totalEnt = gEntregas.reduce((s,e)=>s+e.monto,0);
+
+  const entHTML = gEntregas.length ? gEntregas.map(e=>`
+    <div class="entrega-card">
+      <div class="ec-info">
+        <div class="ec-unidad">${e.unidad}</div>
+      </div>
+      <div class="ec-monto">$${parseFloat(e.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+      <button class="ec-del" onclick="gEliminarEntrega('${e.id}')">✕</button>
+    </div>`).join('') 
+    : '<div style="text-align:center;color:var(--text2);font-size:.82rem;padding:20px">Aún no hay entregas registradas</div>';
+
+  el.innerHTML = `
+    <div class="turno-activo-banner">
+      <span class="tab-banner-icon">⛽</span>
+      <div class="tab-banner-info">
+        <div class="tab-banner-title">Turno activo — ${gTurnoActivo.responsable}</div>
+        <div class="tab-banner-sub">Apertura: ${gTurnoActivo.hora_apertura} · ${gTurnoActivo.fecha} · Inventario: $${totalAp.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+      </div>
+    </div>
+
+    <!-- Entregas por unidad -->
+    <div class="gas-section">
+      <div class="gas-section-title">🚗 Entregas por unidad — Total: <span style="color:#dc2626">$${totalEnt.toLocaleString('es-MX',{minimumFractionDigits:2})}</span></div>
+      <div class="unidades-entregas-grid">
+        ${UNIDADES_TAXI.map(u=>{
+          const entU = gEntregas.filter(e=>e.unidad===u);
+          const montoU = entU.reduce((s,e)=>s+parseFloat(e.monto||0),0);
+          return `<div class="ue-card ${montoU>0?'tiene-entrega':''}">
+            <div class="ue-nombre">${u}</div>
+            <div class="ue-monto-display" id="disp_${u.replace(/\s/g,'_')}">${montoU>0?'$'+montoU.toLocaleString('es-MX',{minimumFractionDigits:2}):''}</div>
+            <input type="number" min="0" step="0.01" class="ue-input" id="inp_${u.replace(/\s/g,'_')}" placeholder="$0" value="" oninput="gActualizarUE('${u}')">
+            <button class="ue-add-btn" onclick="gAgregarEntregaUnidad('${u}')">+</button>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <!-- Cierre -->
+    <div class="gas-section">
+      <div class="gas-section-title">🔒 Cierre de turno — cuenta lo que queda</div>
+      <div class="gas-section-title" style="margin-top:0;color:var(--text2);border-color:var(--border)">📦 Inventario final — hojas y vales sueltos</div>
+      ${gDenomGrid('cier')}
+      <div class="gas-total-bar" style="margin-bottom:14px">
+        <span class="gt-label">💰 Total inventario final</span>
+        <span class="gt-value" id="cier_total">$0</span>
+      </div>
+      <button class="gas-btn gas-btn-danger" onclick="gCerrarTurno()">🔒 Cerrar turno y generar PDF</button>
+    </div>`;
+}
+
+function gActualizarUE(unidad){}
+
+async function gAgregarEntregaUnidad(unidad){
+  const inputId = 'inp_'+unidad.replace(/\s/g,'_');
+  const monto = parseFloat(document.getElementById(inputId)?.value)||0;
+  if(monto<=0){toast('Ingresa el monto para '+unidad,'err');return;}
+  await _doAgregarEntrega(unidad, monto, inputId);
+}
+async function _doAgregarEntrega(unidad, monto, inputId){
+  setLoading(true);
+  try{
+    // Si ya existe una entrega para esa unidad en este turno, sumarla
+    const existe = gEntregas.find(e=>e.unidad===unidad);
+    if(existe){
+      const nuevoMonto = parseFloat(existe.monto)+monto;
+      await supa.patch('gas_entregas','id=eq.'+existe.id,{monto:nuevoMonto});
+      existe.monto = nuevoMonto;
+    } else {
+      const [row] = await supa.post('gas_entregas',{turno_id:gTurnoActivo.id, unidad, detalle:{}, monto});
+      gEntregas.push(row);
+    }
+    document.getElementById(inputId).value='';
+    gRenderTurno();
+    toast(unidad+' registrado ✓','ok');
+  }catch(e){toast('Error: '+e.message,'err');}
+  setLoading(false);
+}
+
+async function gRegistrarEntrega(){}
+
+async function gEliminarEntrega(id){
+  if(!confirm('¿Eliminar esta entrega?'))return;
+  setLoading(true);
+  try{
+    await supa.del('gas_entregas','id=eq.'+id);
+    gEntregas = gEntregas.filter(e=>e.id!==id);
+    gRenderTurno();
+    toast('Entrega eliminada','info');
+  }catch(e){toast('Error al eliminar','err');}
+  setLoading(false);
+}
+
+async function gCerrarTurno(){
+  const {datos:datosCierre, total:totalCierre} = gLeerGrid('cier');
+  if(totalCierre<=0){toast('Ingresa al menos un vale al cierre','err');return;}
+  const responsable = gTurnoActivo?.responsable;
+  pinSolicitar(responsable,'Cerrar turno', ()=>_doCerrarTurno(datosCierre, totalCierre));
+}
+async function _doCerrarTurno(datosCierre, totalCierre){
+  const totalEnt = gEntregas.reduce((s,e)=>s+e.monto,0);
+  const totalAp = gTurnoActivo.total_apertura||0;
+  const diferencia = parseFloat((totalCierre - (totalAp - totalEnt)).toFixed(2));
+  const cuadra = Math.abs(diferencia) < 0.01;
+  if(!confirm(`¿Cerrar el turno?
+
+Apertura:  $${totalAp.toLocaleString()}
+Entregado: $${totalEnt.toLocaleString()}
+Cierre:    $${totalCierre.toLocaleString()}
+Diferencia: $${diferencia>=0?'+':''}${diferencia.toLocaleString()}
+
+${cuadra?'✅ CUADRA PERFECTAMENTE':'⚠️ HAY DIFERENCIA'}`))return;
+  const horaAhora = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+  setLoading(true);
+  try{
+    await supa.patch('gas_turnos','id=eq.'+gTurnoActivo.id,{
+      cierre:datosCierre, total_cierre:totalCierre, total_entregas:totalEnt,
+      diferencia, cuadra, hora_cierre:horaAhora, estatus:'cerrado'
+    });
+    const turnoParaPDF = {...gTurnoActivo, total_cierre:totalCierre, total_entregas:totalEnt, diferencia, cuadra, hora_cierre:horaAhora};
+    const entregasParaPDF = [...gEntregas];
+    gHistorial.unshift(turnoParaPDF);
+    gTurnoActivo = null;
+    gEntregas = [];
+    gRenderTurno();
+    toast(cuadra?'Turno cerrado ✅ Generando PDF...':'Turno cerrado ⚠️ Generando PDF...', 'ok');
+    setTimeout(()=>gGenerarPDF(turnoParaPDF, entregasParaPDF), 300);
+  }catch(e){toast('Error al cerrar: '+e.message,'err');}
+  setLoading(false);
+}
+
+function gGenerarPDF(turno, entregas){
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({orientation:'portrait', unit:'mm', format:'a4'});
+  const W = 210, margin = 18;
+  let y = margin;
+
+  // Header
+  doc.setFillColor(30,36,51);
+  doc.rect(0,0,W,32,'F');
+  doc.setTextColor(217,119,6);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(14);
+  doc.text('CORP. AEROPUERTO LOS MOCHIS', W/2, 13, {align:'center'});
+  doc.setTextColor(180,180,180);
+  doc.setFontSize(9);
+  doc.setFont('helvetica','normal');
+  doc.text('Control de Vales de Gasolina — Resumen de Turno', W/2, 20, {align:'center'});
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(8);
+  doc.text(`Generado: ${new Date().toLocaleDateString('es-MX')} ${new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}`, W/2, 27, {align:'center'});
+  y = 42;
+
+  // Info turno
+  doc.setFillColor(247,249,252);
+  doc.roundedRect(margin, y, W-margin*2, 28, 3, 3, 'F');
+  doc.setDrawColor(221,227,237);
+  doc.roundedRect(margin, y, W-margin*2, 28, 3, 3, 'S');
+  doc.setTextColor(30,36,51);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(9);
+  doc.text('Fecha:', margin+4, y+8);
+  doc.text('Responsable:', margin+4, y+16);
+  doc.text('Horario:', margin+4, y+24);
+  doc.setFont('helvetica','normal');
+  doc.text(turno.fecha||'—', margin+30, y+8);
+  doc.text(turno.responsable||'—', margin+30, y+16);
+  doc.text(`${turno.hora_apertura||'—'} — ${turno.hora_cierre||'—'}`, margin+30, y+24);
+  y += 36;
+
+  // Resumen financiero
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.setTextColor(5,150,105);
+  doc.text('RESUMEN FINANCIERO', margin, y);
+  y += 6;
+  doc.setDrawColor(5,150,105);
+  doc.setLineWidth(0.5);
+  doc.line(margin, y, W-margin, y);
+  y += 6;
+
+  const totalAp = turno.total_apertura||0;
+  const totalEnt = turno.total_entregas||0;
+  const totalCie = turno.total_cierre||0;
+  const dif = turno.diferencia||0;
+  const cuadra = turno.cuadra;
+
+  // Build denom breakdown string
+  const gDenomStr = (datos) => {
+    if(!datos) return '—';
+    return [160,100,80,50].map(d=>{
+      const k='d'+d; const h=datos[k]?.hojas||0; const s=datos[k]?.sueltos||0;
+      if(!h&&!s) return null;
+      return `$${d}: ${h} hoja(s) + ${s} suelto(s)`;
+    }).filter(Boolean).join('  |  ') || '—';
+  };
+
+  // Rows: [label, value, subtext?]
+  const filas = [
+    ['Inventario de apertura', `$${totalAp.toLocaleString('es-MX',{minimumFractionDigits:2})}`, gDenomStr(turno.apertura)],
+    ['Total entregado a unidades', `$${totalEnt.toLocaleString('es-MX',{minimumFractionDigits:2})}`, null],
+    ['Inventario esperado al cierre', `$${(totalAp-totalEnt).toLocaleString('es-MX',{minimumFractionDigits:2})}`, null],
+    ['Inventario contado al cierre', `$${totalCie.toLocaleString('es-MX',{minimumFractionDigits:2})}`, gDenomStr(turno.cierre)],
+  ];
+
+  filas.forEach((fila,i)=>{
+    const rowH = fila[2] ? 13 : 8;
+    if(i%2===0){ doc.setFillColor(247,249,252); doc.rect(margin,y,W-margin*2,rowH,'F'); }
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(60,60,60);
+    doc.text(fila[0], margin+3, y+6);
+    doc.setFont('helvetica','bold'); doc.setTextColor(30,36,51);
+    doc.text(fila[1], W-margin-3, y+6, {align:'right'});
+    if(fila[2]){
+      doc.setFont('helvetica','normal'); doc.setFontSize(7); doc.setTextColor(120,120,120);
+      doc.text(fila[2], margin+3, y+11);
+    }
+    y += rowH;
+  });
+
+  // Diferencia box
+  y += 4;
+  const difColor = cuadra ? [5,150,105] : [220,38,38];
+  doc.setFillColor(...difColor);
+  doc.roundedRect(margin, y, W-margin*2, 12, 2, 2, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.text(cuadra ? '✓ CUADRA PERFECTAMENTE' : '⚠ HAY DIFERENCIA', margin+4, y+8);
+  doc.text(`${dif>=0?'+':''}$${Math.abs(dif).toLocaleString('es-MX',{minimumFractionDigits:2})}`, W-margin-4, y+8, {align:'right'});
+  y += 20;
+
+  // Detalle entregas
+  doc.setFont('helvetica','bold');
+  doc.setFontSize(10);
+  doc.setTextColor(5,150,105);
+  doc.text('DETALLE DE ENTREGAS POR UNIDAD', margin, y);
+  y += 6;
+  doc.setDrawColor(5,150,105);
+  doc.line(margin, y, W-margin, y);
+  y += 5;
+
+  if(!entregas.length){
+    doc.setFont('helvetica','italic'); doc.setFontSize(9); doc.setTextColor(150,150,150);
+    doc.text('Sin entregas registradas', margin+3, y+5);
+    y += 12;
+  } else {
+    // Table header
+    doc.setFillColor(30,36,51);
+    doc.rect(margin, y, W-margin*2, 7, 'F');
+    doc.setTextColor(255,255,255);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(8);
+    doc.text('#', margin+3, y+5);
+    doc.text('Unidad', margin+12, y+5);
+    doc.text('Monto entregado', W-margin-3, y+5, {align:'right'});
+    y += 7;
+
+    entregas.forEach((e,i)=>{
+      if(y > 260){ doc.addPage(); y = margin; }
+      if(i%2===0){ doc.setFillColor(247,249,252); doc.rect(margin,y,W-margin*2,7,'F'); }
+      doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(60,60,60);
+      doc.text(String(i+1), margin+3, y+5);
+      doc.text(e.unidad||'—', margin+12, y+5);
+      doc.setFont('helvetica','bold'); doc.setTextColor(30,36,51);
+      doc.text(`$${parseFloat(e.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}`, W-margin-3, y+5, {align:'right'});
+      y += 7;
+    });
+
+    // Total entregas
+    doc.setFillColor(220,38,38);
+    doc.rect(margin, y, W-margin*2, 8, 'F');
+    doc.setTextColor(255,255,255);
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(9);
+    doc.text('TOTAL ENTREGADO', margin+3, y+5.5);
+    doc.text(`$${totalEnt.toLocaleString('es-MX',{minimumFractionDigits:2})}`, W-margin-3, y+5.5, {align:'right'});
+    y += 14;
+  }
+
+  // Footer
+  const pageH = doc.internal.pageSize.height;
+  doc.setDrawColor(221,227,237);
+  doc.setLineWidth(0.3);
+  doc.line(margin, pageH-14, W-margin, pageH-14);
+  doc.setFont('helvetica','normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(150,150,150);
+  doc.text(EMPRESA, W/2, pageH-9, {align:'center'});
+  doc.text(`${turno.fecha} · ${turno.responsable}`, W/2, pageH-5, {align:'center'});
+
+  doc.save(`turno_gasolina_${turno.fecha}_${(turno.responsable||'').split(' ')[0]}.pdf`);
+}
+
+function gRenderHistorial(){
+  const el = document.getElementById('gTab-historial');
+  if(!gHistorial.length){
+    el.innerHTML='<div style="text-align:center;color:var(--text2);padding:40px;font-size:.85rem">Aún no hay turnos cerrados.</div>';
+    return;
+  }
+  el.innerHTML = gHistorial.map(t=>{
+    const dif = t.diferencia||0;
+    const cuadra = t.cuadra;
+    return `<div class="hist-card">
+      <div class="hist-top">
+        <div>
+          <div class="hist-fecha">📅 ${t.fecha} · ${t.hora_apertura||'—'} – ${t.hora_cierre||'—'}</div>
+          <div class="hist-persona">👤 ${t.responsable}</div>
+        </div>
+        <span class="hist-badge ${cuadra?'ok':'err'}">${cuadra?'✅ Cuadra':'❌ Diferencia'}</span>
+      </div>
+      <div class="hist-nums">
+        <div class="hn-item"><span class="hn-label">Apertura</span><span class="hn-val">$${(t.total_apertura||0).toLocaleString()}</span></div>
+        <div class="hn-item"><span class="hn-label">Entregado</span><span class="hn-val">$${(t.total_entregas||0).toLocaleString()}</span></div>
+        <div class="hn-item"><span class="hn-label">Cierre</span><span class="hn-val">$${(t.total_cierre||0).toLocaleString()}</span></div>
+        <div class="hn-item"><span class="hn-label">Diferencia</span><span class="hn-val" style="color:${Math.abs(dif)<0.01?'#059669':'#dc2626'}">${dif>=0?'+':''}$${dif.toLocaleString()}</span></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+</script>
+<!-- ══ PIN MODAL ══ -->
+<div id="pin-overlay" style="display:none;position:fixed;inset:0;background:rgba(30,36,51,.6);z-index:9000;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:28px 24px;width:100%;max-width:340px;margin:16px;box-shadow:0 24px 64px rgba(0,0,0,.25);text-align:center;">
+    <div style="font-size:2rem;margin-bottom:8px;">🔐</div>
+    <div id="pin-title" style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:#1e2433;margin-bottom:4px;"></div>
+    <div id="pin-sub" style="font-size:.78rem;color:#888;margin-bottom:18px;"></div>
+    <input id="pin-input" type="password" maxlength="4" placeholder="····"
+      style="width:100%;padding:14px;border:2px solid #dde3ed;border-radius:10px;font-size:1.4rem;text-align:center;letter-spacing:.4em;outline:none;font-family:'Syne',sans-serif;font-weight:800;color:#1e2433;"
+      oninput="pinVerificar()" onkeydown="if(event.key==='Enter')pinVerificar()">
+    <div id="pin-err" style="font-size:.78rem;color:#dc2626;margin-top:8px;min-height:16px;"></div>
+    <div style="display:flex;gap:8px;margin-top:14px;">
+      <button onclick="pinCerrar()" style="flex:1;padding:10px;border:1.5px solid #dde3ed;border-radius:8px;background:#f7f9fc;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;color:#666;">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let pinCallback = null;
+let pinResponsable = null;
+
+function pinSolicitar(responsable, accion, callback){
+  pinResponsable = responsable;
+  pinCallback = callback;
+  document.getElementById('pin-title').textContent = 'PIN requerido';
+  document.getElementById('pin-sub').textContent = responsable + ' — ' + accion;
+  document.getElementById('pin-input').value = '';
+  document.getElementById('pin-err').textContent = '';
+  const po = document.getElementById('pin-overlay');
+  po.style.display = 'flex';
+  po.style.alignItems = 'center';
+  po.style.justifyContent = 'center';
+  setTimeout(()=>document.getElementById('pin-input').focus(), 150);
+}
+
+function pinVerificar(){
+  const val = document.getElementById('pin-input').value;
+  if(val.length < 4) return;
+  const resp = RESPONSABLES.find(r=>r.nombre===pinResponsable);
+  if(resp && val === resp.pin){
+    document.getElementById('pin-overlay').style.display = 'none';
+    document.getElementById('pin-err').textContent = '';
+    const cb = pinCallback;
+    pinCallback = null;
+    if(cb) cb();
+  } else {
+    document.getElementById('pin-err').textContent = 'PIN incorrecto. Intenta de nuevo.';
+    document.getElementById('pin-input').value = '';
+  }
+}
+
+function pinCerrar(){
+  document.getElementById('pin-overlay').style.display = 'none';
+  pinCallback = null;
+  pinResponsable = null;
 }
 </script>
 </body>
