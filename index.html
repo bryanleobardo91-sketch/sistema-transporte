@@ -1630,8 +1630,9 @@ function gRenderTurnoActivo(el){
       <span class="tab-banner-icon">⛽</span>
       <div class="tab-banner-info">
         <div class="tab-banner-title">Turno activo — ${gTurnoActivo.responsable}</div>
-        <div class="tab-banner-sub">Apertura: ${gTurnoActivo.hora_apertura} · ${gTurnoActivo.fecha} · Inventario: $${totalAp.toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+        <div class="tab-banner-sub">Apertura: ${gTurnoActivo.hora_apertura} · ${gTurnoActivo.fecha} · Inventario: $${(gTurnoActivo.total_apertura_ajustado||totalAp).toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
       </div>
+      <button class="gas-btn" style="white-space:nowrap;font-size:.78rem;padding:8px 14px;background:#059669;" onclick="gAbrirModalPedido()">📦 Recibir vales</button>
     </div>
 
     <!-- Entregas por unidad -->
@@ -1714,7 +1715,7 @@ async function gCerrarTurno(){
 }
 async function _doCerrarTurno(datosCierre, totalCierre){
   const totalEnt = gEntregas.reduce((s,e)=>s+e.monto,0);
-  const totalAp = gTurnoActivo.total_apertura||0;
+  const totalAp = gTurnoActivo.total_apertura_ajustado||gTurnoActivo.total_apertura||0;
   const diferencia = parseFloat((totalCierre - (totalAp - totalEnt)).toFixed(2));
   const cuadra = Math.abs(diferencia) < 0.01;
   if(!confirm(`¿Cerrar el turno?
@@ -1794,7 +1795,10 @@ function gGenerarPDF(turno, entregas){
   doc.line(margin, y, W-margin, y);
   y += 6;
 
-  const totalAp = turno.total_apertura||0;
+  const totalAp = turno.total_apertura_ajustado||turno.total_apertura||0;
+  const totalAperturaBruta = turno.total_apertura||0;
+  const pedidos = turno.pedidos_recibidos||[];
+  const totalPedidos = pedidos.reduce((s,p)=>s+(p.total||0),0);
   const totalEnt = turno.total_entregas||0;
   const totalCie = turno.total_cierre||0;
   const dif = turno.diferencia||0;
@@ -1812,7 +1816,9 @@ function gGenerarPDF(turno, entregas){
 
   // Rows: [label, value, subtext?]
   const filas = [
-    ['Inventario de apertura', `$${totalAp.toLocaleString('es-MX',{minimumFractionDigits:2})}`, gDenomStr(turno.apertura)],
+    ['Inventario apertura (inicial)', `$${totalAperturaBruta.toLocaleString('es-MX',{minimumFractionDigits:2})}`, gDenomStr(turno.apertura)],
+    ...(pedidos.length?[['Pedidos recibidos durante turno', `+ $${totalPedidos.toLocaleString('es-MX',{minimumFractionDigits:2})}`, pedidos.map(p=>`${p.hora} · ${p.responsable}: $${p.total.toLocaleString()}`).join('  |  ')]]:[]),
+    ['Inventario disponible total', `$${totalAp.toLocaleString('es-MX',{minimumFractionDigits:2})}`, null],
     ['Total entregado a unidades', `$${totalEnt.toLocaleString('es-MX',{minimumFractionDigits:2})}`, null],
     ['Inventario esperado al cierre', `$${(totalAp-totalEnt).toLocaleString('es-MX',{minimumFractionDigits:2})}`, null],
     ['Inventario contado al cierre', `$${totalCie.toLocaleString('es-MX',{minimumFractionDigits:2})}`, gDenomStr(turno.cierre)],
@@ -1949,6 +1955,124 @@ function gRenderHistorial(){
     </div>
   </div>
 </div>
+
+<!-- ══ PEDIDO VALES MODAL ══ -->
+<div id="pedido-overlay" style="display:none;position:fixed;inset:0;background:rgba(30,36,51,.65);z-index:8500;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 16px;">
+  <div style="background:#fff;border-radius:16px;padding:28px 24px;width:100%;max-width:520px;margin:auto;box-shadow:0 24px 64px rgba(0,0,0,.28);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;color:#1e2433;">📦 Recibir pedido de vales</div>
+        <div style="font-size:.78rem;color:#888;margin-top:2px;">Se sumará al inventario del turno activo</div>
+      </div>
+      <button onclick="gCerrarModalPedido()" style="background:#f7f9fc;border:1.5px solid #dde3ed;border-radius:8px;padding:6px 12px;cursor:pointer;font-size:.82rem;font-weight:700;color:#555;">✕ Cerrar</button>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Quién recibe</label>
+      <select id="pedido-responsable" style="width:100%;padding:9px 12px;border:1.5px solid #dde3ed;border-radius:8px;font-size:.9rem;background:#fff;color:#1e2433;outline:none;">
+        <option value="">— Selecciona responsable —</option>
+      </select>
+    </div>
+    <div style="font-size:.78rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Vales recibidos — hojas y sueltos</div>
+    <div id="pedido-denom-grid"></div>
+    <div class="gas-total-bar" style="margin:12px 0 18px">
+      <span class="gt-label">💰 Total a agregar</span>
+      <span class="gt-value" id="pedido_total">$0</span>
+    </div>
+    <div id="pedido-err" style="font-size:.8rem;color:#dc2626;min-height:16px;margin-bottom:8px;"></div>
+    <button class="gas-btn" style="background:#059669;" onclick="gConfirmarPedido()">✓ Confirmar recepción</button>
+  </div>
+</div>
+
+<script>
+function gAbrirModalPedido(){
+  // Poblar select de responsables
+  const sel=document.getElementById('pedido-responsable');
+  sel.innerHTML='<option value="">— Selecciona responsable —</option>'+RESPONSABLES.map(r=>`<option value="${r.nombre}">${r.nombre}</option>`).join('');
+  // Render denom grid
+  const grid=document.getElementById('pedido-denom-grid');
+  grid.innerHTML='<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;">'+DENOMINACIONES.map(d=>`
+    <div style="background:#f7f9fc;border:1.5px solid #dde3ed;border-radius:10px;padding:12px 8px;text-align:center;">
+      <span style="font-family:Syne,sans-serif;font-size:.85rem;font-weight:800;color:#059669;display:block;margin-bottom:10px;">$${d}</span>
+      <div style="margin-bottom:8px;">
+        <div style="font-size:.62rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Hojas</div>
+        <input type="number" min="0" id="ped_h_${d}" value="0" oninput="gActualizarPedidoTotal()" placeholder="0"
+          style="width:100%;padding:8px 4px;border:1.5px solid #dde3ed;border-radius:6px;font-size:1.1rem;font-weight:700;text-align:center;background:#fff;color:#1e2433;outline:none;">
+      </div>
+      <div style="margin-bottom:8px;">
+        <div style="font-size:.62rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Sueltos</div>
+        <input type="number" min="0" id="ped_s_${d}" value="0" oninput="gActualizarPedidoTotal()" placeholder="0"
+          style="width:100%;padding:8px 4px;border:1.5px solid #dde3ed;border-radius:6px;font-size:1.1rem;font-weight:700;text-align:center;background:#fff;color:#1e2433;outline:none;">
+      </div>
+      <div id="ped_sub_${d}" style="font-size:.72rem;color:#6b7280;margin-top:4px;">= <span style="font-weight:700;color:#059669;">$0</span></div>
+    </div>`).join('')+'</div>';
+  document.getElementById('pedido-responsable').value='';
+  document.getElementById('pedido-err').textContent='';
+  document.getElementById('pedido_total').textContent='$0';
+  const ov=document.getElementById('pedido-overlay');
+  ov.style.display='flex';
+}
+
+function gCerrarModalPedido(){
+  document.getElementById('pedido-overlay').style.display='none';
+}
+
+function gActualizarPedidoTotal(){
+  let total=0;
+  DENOMINACIONES.forEach(d=>{
+    const h=parseInt(document.getElementById('ped_h_'+d)?.value)||0;
+    const s=parseInt(document.getElementById('ped_s_'+d)?.value)||0;
+    const sub=(h*VALES_POR_HOJA+s)*d; total+=sub;
+    const el=document.getElementById('ped_sub_'+d);
+    if(el) el.innerHTML=`= <span>$${sub.toLocaleString()}</span>`;
+  });
+  const tel=document.getElementById('pedido_total');
+  if(tel) tel.textContent='$'+total.toLocaleString('es-MX',{minimumFractionDigits:2});
+}
+
+function gLeerPedidoGrid(){
+  const datos={}; let total=0;
+  DENOMINACIONES.forEach(d=>{
+    const h=parseInt(document.getElementById('ped_h_'+d)?.value)||0;
+    const s=parseInt(document.getElementById('ped_s_'+d)?.value)||0;
+    datos['d'+d]={hojas:h,sueltos:s};
+    total+=(h*VALES_POR_HOJA+s)*d;
+  });
+  return {datos,total};
+}
+
+function gConfirmarPedido(){
+  const responsable=document.getElementById('pedido-responsable').value;
+  const err=document.getElementById('pedido-err');
+  if(!responsable){err.textContent='Selecciona quién recibe el pedido.';return;}
+  const {datos,total}=gLeerPedidoGrid();
+  if(total<=0){err.textContent='Ingresa al menos un vale.';return;}
+  err.textContent='';
+  pinSolicitar(responsable,'Recibir pedido de vales',()=>_doRegistrarPedido(responsable,datos,total));
+}
+
+async function _doRegistrarPedido(responsable,datos,total){
+  setLoading(true);
+  try{
+    const nuevoPedidos=gTurnoActivo.pedidos_recibidos?[...gTurnoActivo.pedidos_recibidos]:[];
+    const hora=new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+    nuevoPedidos.push({responsable,datos,total,hora,fecha:new Date().toISOString().split('T')[0]});
+    const nuevoTotalAjustado=(gTurnoActivo.total_apertura_ajustado||gTurnoActivo.total_apertura||0)+total;
+    await supa.patch('gas_turnos','id=eq.'+gTurnoActivo.id,{
+      pedidos_recibidos:nuevoPedidos,
+      total_apertura_ajustado:nuevoTotalAjustado
+    });
+    gTurnoActivo.pedidos_recibidos=nuevoPedidos;
+    gTurnoActivo.total_apertura_ajustado=nuevoTotalAjustado;
+    gCerrarModalPedido();
+    gRenderTurno();
+    toast('Pedido de $'+total.toLocaleString()+' agregado ✓  Inventario actual: $'+nuevoTotalAjustado.toLocaleString(),'ok');
+  }catch(e){
+    document.getElementById('pedido-err').textContent='Error: '+e.message;
+    toast('Error al registrar pedido','err');
+  }
+  setLoading(false);
+}
+</script>
 
 <script>
 let pinCallback = null;
