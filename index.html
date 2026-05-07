@@ -1927,7 +1927,10 @@ function gRenderHistorial(){
           <div class="hist-fecha">📅 ${t.fecha} · ${t.hora_apertura||'—'} – ${t.hora_cierre||'—'}</div>
           <div class="hist-persona">👤 ${t.responsable}</div>
         </div>
-        <span class="hist-badge ${cuadra?'ok':'err'}">${cuadra?'✅ Cuadra':'❌ Diferencia'}</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="hist-badge ${cuadra?'ok':'err'}">${cuadra?'✅ Cuadra':'❌ Diferencia'}</span>
+          <button onclick="gPdfHistorial('${t.id}')" style="background:#1e2433;color:#fff;border:none;padding:6px 12px;border-radius:7px;font-size:.75rem;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;white-space:nowrap;">📄 PDF</button>
+        </div>
       </div>
       <div class="hist-nums">
         <div class="hn-item"><span class="hn-label">Apertura</span><span class="hn-val">$${(t.total_apertura||0).toLocaleString()}</span></div>
@@ -1937,6 +1940,18 @@ function gRenderHistorial(){
       </div>
     </div>`;
   }).join('');
+}
+
+async function gPdfHistorial(turnoId){
+  setLoading(true);
+  try{
+    const turno = gHistorial.find(t=>t.id===turnoId);
+    if(!turno){toast('Turno no encontrado','err');setLoading(false);return;}
+    const entregas = await supa.get('gas_entregas','select=*&turno_id=eq.'+turnoId+'&order=created_at.asc');
+    gGenerarPDF(turno, entregas);
+    toast('Generando PDF...','ok');
+  }catch(e){toast('Error al generar PDF: '+e.message,'err');}
+  setLoading(false);
 }
 
 </script>
