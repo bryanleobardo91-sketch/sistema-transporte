@@ -393,7 +393,7 @@ table.pdf-tbl td.red{color:#c0392b;font-weight:700;}
 .ue-monto-display{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:800;color:#059669;min-height:18px;margin-bottom:4px;}
 .ue-input{width:100%;padding:6px 4px;border:1.5px solid var(--border);border-radius:6px;font-size:.82rem;text-align:center;background:#fff;color:var(--text);outline:none;margin-bottom:5px;}
 .ue-input:focus{border-color:#059669;}
-.ue-add-btn{width:100%;background:#059669;color:#fff;border:none;border-radius:6px;padding:5px;font-size:.8rem;font-weight:700;cursor:pointer;}
+.ue-add-btn{width:100%;background:#059669;color:#fff;border:none;border-radius:6px;padding:5px;font-size:.75rem;font-weight:700;cursor:pointer;line-height:1.3;}
 .ue-add-btn:hover{opacity:.85;}
 @media(max-width:768px){
   .unidades-entregas-grid{grid-template-columns:repeat(2,1fr);}
@@ -979,7 +979,7 @@ async function confirmarRealizado(){
    CRÉDITOS
 ════════════════════════════════════ */
 const CRED_EMPRESA=EMPRESA;
-const UNIDADES_TAXI=Array.from({length:20},(_,i)=>`Taxi ${String(i+1).padStart(2,'00')}`);
+const UNIDADES_TAXI=[...Array.from({length:20},(_,i)=>`Taxi ${String(i+1).padStart(2,'00')}`), 'Camioneta Anselmo'];
 let cClientes=[],cCreditos=[];
 let cPagoModal=null,cSelIds=[],cModoLibre=false,cSoloPend=false;
 let cTabActual='cclientes',cFilCli='',cFilUni='';
@@ -1523,7 +1523,7 @@ function gRenderTurno(){
   else gRenderTurnoActivo(el);
 }
 
-const DENOMINACIONES = [160, 100, 80, 50];
+const DENOMINACIONES = [160, 150, 100, 80, 70, 50];
 const VALES_POR_HOJA = 8;
 
 function gDenomGrid(prefijo, vals={}){
@@ -1613,16 +1613,21 @@ async function _doAbrirTurno(responsable, datos, total){
 
 function gRenderTurnoActivo(el){
   const totalAp = gTurnoActivo.total_apertura||0;
-  const totalEnt = gEntregas.reduce((s,e)=>s+e.monto,0);
+  const totalEntVales = gEntregas.filter(e=>e.tipo!=='efectivo').reduce((s,e)=>s+parseFloat(e.monto||0),0);
+  const totalEntEfectivo = gEntregas.filter(e=>e.tipo==='efectivo').reduce((s,e)=>s+parseFloat(e.monto||0),0);
+  const totalEnt = totalEntVales + totalEntEfectivo;
 
-  const entHTML = gEntregas.length ? gEntregas.map(e=>`
-    <div class="entrega-card">
+  const entHTML = gEntregas.length ? gEntregas.map(e=>{
+    const esEfectivo = e.tipo==='efectivo';
+    return `<div class="entrega-card" style="${esEfectivo?'border-color:#2563eb;background:#eff6ff':''}">
       <div class="ec-info">
         <div class="ec-unidad">${e.unidad}</div>
+        ${esEfectivo?`<div class="ec-detalle" style="color:#2563eb;font-weight:600;">💵 Reembolso efectivo${e.nota?' · '+e.nota:''}</div>`:'<div class="ec-detalle" style="color:#059669;">⛽ Vales</div>'}
       </div>
-      <div class="ec-monto">$${parseFloat(e.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
+      <div class="ec-monto" style="${esEfectivo?'color:#2563eb':''}">\$${parseFloat(e.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}</div>
       <button class="ec-del" onclick="gEliminarEntrega('${e.id}')">✕</button>
-    </div>`).join('') 
+    </div>`;
+  }).join('')
     : '<div style="text-align:center;color:var(--text2);font-size:.82rem;padding:20px">Aún no hay entregas registradas</div>';
 
   el.innerHTML = `
@@ -1637,7 +1642,7 @@ function gRenderTurnoActivo(el){
 
     <!-- Entregas por unidad -->
     <div class="gas-section">
-      <div class="gas-section-title">🚗 Entregas por unidad — Total: <span style="color:#dc2626">$${totalEnt.toLocaleString('es-MX',{minimumFractionDigits:2})}</span></div>
+      <div class="gas-section-title">🚗 Entregas por unidad — Total: <span style="color:#dc2626">$${totalEnt.toLocaleString('es-MX',{minimumFractionDigits:2})}</span>${totalEntEfectivo>0?` <span style="font-size:.72rem;color:#2563eb;font-weight:600;">(💵 Efectivo: $${totalEntEfectivo.toLocaleString('es-MX',{minimumFractionDigits:2})})</span>`:''}</div>
       <div class="unidades-entregas-grid">
         ${UNIDADES_TAXI.map(u=>{
           const entU = gEntregas.filter(e=>e.unidad===u);
@@ -1646,7 +1651,8 @@ function gRenderTurnoActivo(el){
             <div class="ue-nombre">${u}</div>
             <div class="ue-monto-display" id="disp_${u.replace(/\s/g,'_')}">${montoU>0?'$'+montoU.toLocaleString('es-MX',{minimumFractionDigits:2}):''}</div>
             <input type="number" min="0" step="0.01" class="ue-input" id="inp_${u.replace(/\s/g,'_')}" placeholder="$0" value="" oninput="gActualizarUE('${u}')">
-            <button class="ue-add-btn" onclick="gAgregarEntregaUnidad('${u}')">+</button>
+            <button class="ue-add-btn" onclick="gAgregarEntregaUnidad('${u}')">⛽ +Vales</button>
+            <button class="ue-add-btn" style="background:#2563eb;margin-top:3px;font-size:.7rem;" onclick="gAbrirReembolso('${u}')">💵 Efectivo</button>
           </div>`;
         }).join('')}
       </div>
@@ -1671,22 +1677,55 @@ async function gAgregarEntregaUnidad(unidad){
   const inputId = 'inp_'+unidad.replace(/\s/g,'_');
   const monto = parseFloat(document.getElementById(inputId)?.value)||0;
   if(monto<=0){toast('Ingresa el monto para '+unidad,'err');return;}
-  await _doAgregarEntrega(unidad, monto, inputId);
+  await _doAgregarEntrega(unidad, monto, inputId, 'vales', '');
 }
-async function _doAgregarEntrega(unidad, monto, inputId){
+
+// ── Modal reembolso efectivo ──
+let gReembolsoUnidad = null;
+function gAbrirReembolso(unidad){
+  gReembolsoUnidad = unidad;
+  document.getElementById('reembolso-unidad-label').textContent = unidad;
+  document.getElementById('reembolso-monto').value = '';
+  document.getElementById('reembolso-nota').value = '';
+  document.getElementById('reembolso-err').textContent = '';
+  document.getElementById('reembolso-overlay').style.display = 'flex';
+  setTimeout(()=>document.getElementById('reembolso-monto').focus(),150);
+}
+function gCerrarReembolso(){
+  document.getElementById('reembolso-overlay').style.display = 'none';
+  gReembolsoUnidad = null;
+}
+async function gConfirmarReembolso(){
+  const monto = parseFloat(document.getElementById('reembolso-monto').value)||0;
+  const nota = document.getElementById('reembolso-nota').value.trim();
+  const err = document.getElementById('reembolso-err');
+  if(monto<=0){err.textContent='Ingresa un monto válido.';return;}
+  if(!gReembolsoUnidad){err.textContent='Error: unidad no seleccionada.';return;}
+  err.textContent='';
+  const unidad = gReembolsoUnidad; // guardar antes de cerrar
+  gCerrarReembolso();
+  await _doAgregarEntrega(unidad, monto, null, 'efectivo', nota);
+}
+
+async function _doAgregarEntrega(unidad, monto, inputId, tipo='vales', nota=''){
   setLoading(true);
   try{
-    // Si ya existe una entrega para esa unidad en este turno, sumarla
-    const existe = gEntregas.find(e=>e.unidad===unidad);
-    if(existe){
-      const nuevoMonto = parseFloat(existe.monto)+monto;
-      await supa.patch('gas_entregas','id=eq.'+existe.id,{monto:nuevoMonto});
-      existe.monto = nuevoMonto;
+    // Vales: acumular en registro existente. Efectivo: siempre registro nuevo separado
+    if(tipo==='vales'){
+      const existe = gEntregas.find(e=>e.unidad===unidad && e.tipo!=='efectivo');
+      if(existe){
+        const nuevoMonto = parseFloat(existe.monto)+monto;
+        await supa.patch('gas_entregas','id=eq.'+existe.id,{monto:nuevoMonto});
+        existe.monto = nuevoMonto;
+      } else {
+        const [row] = await supa.post('gas_entregas',{turno_id:gTurnoActivo.id, unidad, detalle:{}, monto, tipo:'vales', nota:''});
+        gEntregas.push(row);
+      }
     } else {
-      const [row] = await supa.post('gas_entregas',{turno_id:gTurnoActivo.id, unidad, detalle:{}, monto});
+      const [row] = await supa.post('gas_entregas',{turno_id:gTurnoActivo.id, unidad, detalle:{}, monto, tipo:'efectivo', nota});
       gEntregas.push(row);
     }
-    document.getElementById(inputId).value='';
+    if(inputId) document.getElementById(inputId).value='';
     gRenderTurno();
     toast(unidad+' registrado ✓','ok');
   }catch(e){toast('Error: '+e.message,'err');}
@@ -1714,26 +1753,31 @@ async function gCerrarTurno(){
   pinSolicitar(responsable,'Cerrar turno', ()=>_doCerrarTurno(datosCierre, totalCierre));
 }
 async function _doCerrarTurno(datosCierre, totalCierre){
-  const totalEnt = gEntregas.reduce((s,e)=>s+e.monto,0);
+  const totalEntVales = gEntregas.filter(e=>e.tipo!=='efectivo').reduce((s,e)=>s+parseFloat(e.monto||0),0);
+  const totalEntEfectivo = gEntregas.filter(e=>e.tipo==='efectivo').reduce((s,e)=>s+parseFloat(e.monto||0),0);
+  const totalEnt = totalEntVales + totalEntEfectivo;
   const totalAp = gTurnoActivo.total_apertura_ajustado||gTurnoActivo.total_apertura||0;
-  const diferencia = parseFloat((totalCierre - (totalAp - totalEnt)).toFixed(2));
+  // El cuadre solo aplica sobre vales — el efectivo sale como dinero, no como vale
+  const diferencia = parseFloat((totalCierre - (totalAp - totalEntVales)).toFixed(2));
   const cuadra = Math.abs(diferencia) < 0.01;
   if(!confirm(`¿Cerrar el turno?
 
-Apertura:  $${totalAp.toLocaleString()}
-Entregado: $${totalEnt.toLocaleString()}
-Cierre:    $${totalCierre.toLocaleString()}
-Diferencia: $${diferencia>=0?'+':''}${diferencia.toLocaleString()}
+Apertura (vales):   $${totalAp.toLocaleString()}
+Entregado en vales: $${totalEntVales.toLocaleString()}
+Reembolsos efectivo: $${totalEntEfectivo.toLocaleString()}
+Cierre (vales):     $${totalCierre.toLocaleString()}
+Diferencia vales:   $${diferencia>=0?'+':''}${diferencia.toLocaleString()}
 
-${cuadra?'✅ CUADRA PERFECTAMENTE':'⚠️ HAY DIFERENCIA'}`))return;
+${cuadra?'✅ CUADRA PERFECTAMENTE':'⚠️ HAY DIFERENCIA EN VALES'}`))return;
   const horaAhora = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
   setLoading(true);
   try{
     await supa.patch('gas_turnos','id=eq.'+gTurnoActivo.id,{
       cierre:datosCierre, total_cierre:totalCierre, total_entregas:totalEnt,
+      total_entregas_vales:totalEntVales, total_entregas_efectivo:totalEntEfectivo,
       diferencia, cuadra, hora_cierre:horaAhora, estatus:'cerrado'
     });
-    const turnoParaPDF = {...gTurnoActivo, total_cierre:totalCierre, total_entregas:totalEnt, diferencia, cuadra, hora_cierre:horaAhora};
+    const turnoParaPDF = {...gTurnoActivo, total_cierre:totalCierre, total_entregas:totalEnt, total_entregas_vales:totalEntVales, total_entregas_efectivo:totalEntEfectivo, diferencia, cuadra, hora_cierre:horaAhora};
     const entregasParaPDF = [...gEntregas];
     gHistorial.unshift(turnoParaPDF);
     gTurnoActivo = null;
@@ -1807,20 +1851,25 @@ function gGenerarPDF(turno, entregas){
   // Build denom breakdown string
   const gDenomStr = (datos) => {
     if(!datos) return '—';
-    return [160,100,80,50].map(d=>{
+    return [160,150,100,80,70,50].map(d=>{
       const k='d'+d; const h=datos[k]?.hojas||0; const s=datos[k]?.sueltos||0;
       if(!h&&!s) return null;
       return `$${d}: ${h} hoja(s) + ${s} suelto(s)`;
     }).filter(Boolean).join('  |  ') || '—';
   };
 
+  // Calcular vales vs efectivo
+  const entregasVales = entregas.filter(e=>e.tipo!=='efectivo').reduce((s,e)=>s+parseFloat(e.monto||0),0);
+  const entregasEfectivo = entregas.filter(e=>e.tipo==='efectivo').reduce((s,e)=>s+parseFloat(e.monto||0),0);
+
   // Rows: [label, value, subtext?]
   const filas = [
     ['Inventario apertura (inicial)', `$${totalAperturaBruta.toLocaleString('es-MX',{minimumFractionDigits:2})}`, gDenomStr(turno.apertura)],
     ...(pedidos.length?[['Pedidos recibidos durante turno', `+ $${totalPedidos.toLocaleString('es-MX',{minimumFractionDigits:2})}`, pedidos.map(p=>`${p.hora} · ${p.responsable}: $${p.total.toLocaleString()}`).join('  |  ')]]:[]),
     ['Inventario disponible total', `$${totalAp.toLocaleString('es-MX',{minimumFractionDigits:2})}`, null],
-    ['Total entregado a unidades', `$${totalEnt.toLocaleString('es-MX',{minimumFractionDigits:2})}`, null],
-    ['Inventario esperado al cierre', `$${(totalAp-totalEnt).toLocaleString('es-MX',{minimumFractionDigits:2})}`, null],
+    ['Vales entregados a unidades', `$${entregasVales.toLocaleString('es-MX',{minimumFractionDigits:2})}`, null],
+    ...(entregasEfectivo>0?[['Reembolsos en efectivo (foraneos)', `$${entregasEfectivo.toLocaleString('es-MX',{minimumFractionDigits:2})}`, 'No afecta inventario de vales']]:[]),
+    ['Inventario esperado al cierre', `$${(totalAp-entregasVales).toLocaleString('es-MX',{minimumFractionDigits:2})}`, 'Apertura menos vales entregados'],
     ['Inventario contado al cierre', `$${totalCie.toLocaleString('es-MX',{minimumFractionDigits:2})}`, gDenomStr(turno.cierre)],
   ];
 
@@ -1873,18 +1922,27 @@ function gGenerarPDF(turno, entregas){
     doc.setFontSize(8);
     doc.text('#', margin+3, y+5);
     doc.text('Unidad', margin+12, y+5);
-    doc.text('Monto entregado', W-margin-3, y+5, {align:'right'});
+    doc.text('Tipo', margin+80, y+5);
+    doc.text('Monto', W-margin-3, y+5, {align:'right'});
     y += 7;
 
     entregas.forEach((e,i)=>{
+      const rowH = (e.tipo==='efectivo' && e.nota) ? 11 : 7;
       if(y > 260){ doc.addPage(); y = margin; }
       if(i%2===0){ doc.setFillColor(247,249,252); doc.rect(margin,y,W-margin*2,7,'F'); }
+      const esEfPDF = e.tipo==='efectivo';
+      if(esEfPDF){ doc.setFillColor(239,246,255); doc.rect(margin,y,W-margin*2,7,'F'); }
+      else if(i%2===0){ doc.setFillColor(247,249,252); doc.rect(margin,y,W-margin*2,7,'F'); }
       doc.setFont('helvetica','normal'); doc.setFontSize(8.5); doc.setTextColor(60,60,60);
       doc.text(String(i+1), margin+3, y+5);
       doc.text(e.unidad||'—', margin+12, y+5);
-      doc.setFont('helvetica','bold'); doc.setTextColor(30,36,51);
-      doc.text(`$${parseFloat(e.monto).toLocaleString('es-MX',{minimumFractionDigits:2})}`, W-margin-3, y+5, {align:'right'});
-      y += 7;
+      doc.setFont('helvetica','bold');
+      if(esEfPDF){ doc.setTextColor(37,99,235); } else { doc.setTextColor(5,150,105); }
+      doc.text(esEfPDF?'EFECTIVO':'VALES', margin+80, y+5);
+      doc.setFont('helvetica','bold'); doc.setTextColor(esEfPDF?37:30, esEfPDF?99:36, esEfPDF?235:51);
+      doc.text('$'+parseFloat(e.monto).toLocaleString('es-MX',{minimumFractionDigits:2}), W-margin-3, y+5, {align:'right'});
+      if(esEfPDF && e.nota){ doc.setFont('helvetica','italic'); doc.setFontSize(7); doc.setTextColor(100,116,139); doc.text('Nota: '+e.nota, margin+12, y+9); }
+      y += rowH;
     });
 
     // Total entregas
@@ -1955,6 +2013,36 @@ async function gPdfHistorial(turnoId){
 }
 
 </script>
+<!-- ══ REEMBOLSO EFECTIVO MODAL ══ -->
+<div id="reembolso-overlay" style="display:none;position:fixed;inset:0;background:rgba(30,36,51,.6);z-index:8800;align-items:center;justify-content:center;padding:16px;">
+  <div style="background:#fff;border-radius:16px;padding:28px 24px;width:100%;max-width:360px;box-shadow:0 24px 64px rgba(0,0,0,.28);">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;">
+      <span style="font-size:1.8rem;">💵</span>
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:#1e2433;">Reembolso en efectivo</div>
+        <div id="reembolso-unidad-label" style="font-size:.78rem;color:#2563eb;font-weight:600;margin-top:2px;"></div>
+      </div>
+    </div>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Monto a reembolsar ($)</label>
+      <input id="reembolso-monto" type="number" min="0.01" step="0.01" placeholder="0.00"
+        style="width:100%;padding:11px 14px;border:1.5px solid #dde3ed;border-radius:8px;font-size:1.1rem;font-weight:700;text-align:center;background:#fff;color:#1e2433;outline:none;"
+        onkeydown="if(event.key==='Enter')gConfirmarReembolso()">
+    </div>
+    <div style="margin-bottom:16px;">
+      <label style="font-size:.72rem;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;">Nota (opcional)</label>
+      <input id="reembolso-nota" type="text" placeholder="Ej. Gasolina Culiacán, regreso de foráneo..."
+        style="width:100%;padding:9px 12px;border:1.5px solid #dde3ed;border-radius:8px;font-size:.88rem;background:#fff;color:#1e2433;outline:none;"
+        onkeydown="if(event.key==='Enter')gConfirmarReembolso()">
+    </div>
+    <div id="reembolso-err" style="font-size:.8rem;color:#dc2626;min-height:16px;margin-bottom:10px;"></div>
+    <div style="display:flex;gap:10px;">
+      <button onclick="gCerrarReembolso()" style="flex:1;padding:10px;border:1.5px solid #dde3ed;border-radius:8px;background:#f7f9fc;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;color:#666;">Cancelar</button>
+      <button onclick="gConfirmarReembolso()" style="flex:2;padding:10px;border:none;border-radius:8px;background:#2563eb;color:#fff;font-family:'Syne',sans-serif;font-weight:800;font-size:.88rem;cursor:pointer;">✓ Registrar reembolso</button>
+    </div>
+  </div>
+</div>
+
 <!-- ══ PIN MODAL ══ -->
 <div id="pin-overlay" style="display:none;position:fixed;inset:0;background:rgba(30,36,51,.6);z-index:9000;align-items:center;justify-content:center;">
   <div style="background:#fff;border-radius:16px;padding:28px 24px;width:100%;max-width:340px;margin:16px;box-shadow:0 24px 64px rgba(0,0,0,.25);text-align:center;">
