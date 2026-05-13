@@ -149,9 +149,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .banner-icon{font-size:2.5rem;margin-bottom:10px;display:block;}
 .banner-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--text);margin-bottom:4px;}
 .banner-sub{font-size:.8rem;color:var(--text2);margin-bottom:20px;line-height:1.5;}
-.banner-preview{background:#fff;border:3px solid #000;border-radius:4px;padding:22px 18px 16px;margin-bottom:20px;text-align:left;position:relative;min-height:130px;}
-.bp-welcome{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:#000;letter-spacing:.06em;line-height:1;}
-.bp-client{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#000;margin-top:6px;}
+.banner-preview{background:#fff;border:3px solid #000;border-radius:4px;padding:18px 18px 14px;margin-bottom:20px;text-align:center;position:relative;min-height:130px;}
+.bp-welcome{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:#000;letter-spacing:.06em;line-height:1;}.bp-divider{border:none;border-top:2.5px solid #000;margin:6px auto 4px;width:70%;}
+.bp-client{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:#000;line-height:1.3;}
 .bp-footer{margin-top:18px;font-size:.6rem;color:#333;line-height:1.7;}
 .banner-actions{display:flex;gap:10px;}
 .banner-cancel-btn{flex:1;background:var(--surface2);border:1.5px solid var(--border);color:var(--text2);padding:11px;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;}
@@ -521,7 +521,9 @@ table.pdf-tbl td.red{color:#c0392b;font-weight:700;}
     <div class="banner-sub">Se descargará un PDF horizontal listo para imprimir.</div>
     <div class="banner-preview">
       <div class="bp-welcome">BIENVENIDOS</div>
-      <div class="bp-client" id="bp-name">—</div>
+      <div class="bp-divider"></div>
+      <div class="bp-client" id="bp-name-1">—</div>
+      <div class="bp-client" id="bp-name-2"></div>
       <div class="bp-footer" id="bp-footer">—</div>
     </div>
     <div class="banner-actions">
@@ -882,7 +884,9 @@ async function deleteService(id){
 
 function abrirBanner(id){
   bannerServiceId=id;const s=services.find(x=>x.id===id);if(!s)return;
-  document.getElementById('bp-name').textContent=(s.cliente||'').toUpperCase();
+  const pArr=(s.cliente||'').toUpperCase().trim().split(/\s+/);
+  document.getElementById('bp-name-1').textContent=pArr.slice(0,2).join(' ')||'—';
+  document.getElementById('bp-name-2').textContent=pArr.slice(2).join(' ')||'';
   const lines=[];
   if(s.agencia)lines.push('Agencia: '+s.agencia);
   if(s.pasajeros)lines.push('Pasajeros: '+s.pasajeros);
@@ -907,15 +911,25 @@ function generarBannerPDF(){
   if(s.pasajeros)footerLines.push('Pasajeros: '+s.pasajeros);
   if(s.vuelo)footerLines.push('Vuelo: '+tv+s.vuelo+(s.aerolinea?' · '+s.aerolinea:''));
   if(s.origen||s.destino)footerLines.push('Trayecto: '+(s.origen||'?')+' -> '+(s.destino||'?'));
-  const footerLineH=6,footerTotalH=footerLines.length*footerLineH;
-  const footerStartY=H-margen-8-footerTotalH;
+  const footerLineH=6;
+  const footerStartY=H-margen-22;
   doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(60,60,60);
   footerLines.forEach((line,i)=>doc.text(line,margen+10,footerStartY+(i*footerLineH)));
-  const zonaTop=margen+8,zonaBottom=footerStartY-8,zonaCentro=zonaTop+(zonaBottom-zonaTop)/2;
+  const zonaTop=margen+8,zonaBottom=H-margen-8,zonaCentro=zonaTop+(zonaBottom-zonaTop)/2;
   doc.setTextColor(0,0,0);doc.setFont('helvetica','bold');doc.setFontSize(72);
-  doc.text('BIENVENIDOS',W/2,zonaCentro-10,{align:'center'});
-  doc.setLineWidth(1.5);doc.setDrawColor(0,0,0);doc.line(50,zonaCentro+2,W-50,zonaCentro+2);
-  doc.setFontSize(40);doc.text((s.cliente||'').toUpperCase(),W/2,zonaCentro+20,{align:'center'});
+  doc.text('BIENVENIDOS',W/2,zonaCentro-22,{align:'center'});
+  doc.setLineWidth(1.5);doc.setDrawColor(0,0,0);doc.line(50,zonaCentro-8,W-50,zonaCentro-8);
+  // Dividir nombre: primeras dos palabras = nombres, resto = apellidos
+  const partes=(s.cliente||'').toUpperCase().trim().split(/\s+/);
+  const nombres=partes.slice(0,2).join(' ');
+  const apellidos=partes.slice(2).join(' ');
+  doc.setFontSize(48);
+  if(apellidos){
+    doc.text(nombres,W/2,zonaCentro+14,{align:'center'});
+    doc.text(apellidos,W/2,zonaCentro+36,{align:'center'});
+  } else {
+    doc.text(nombres,W/2,zonaCentro+22,{align:'center'});
+  }
   doc.save('banner_'+(s.cliente||'servicio').replace(/\s+/g,'_').toLowerCase()+'.pdf');
   cerrarBanner();
 }
