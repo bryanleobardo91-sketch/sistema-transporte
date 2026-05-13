@@ -902,20 +902,21 @@ function generarBannerPDF(){
   const s=services.find(x=>x.id===bannerServiceId);if(!s)return;
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
-  const W=297,H=210,margen=12;
+  const W=297,H=210,margen=18;
   doc.setFillColor(255,255,255);doc.rect(0,0,W,H,'F');
   doc.setDrawColor(0,0,0);doc.setLineWidth(8);doc.rect(margen,margen,W-(margen*2),H-(margen*2),'S');
   const tv=s.tipoVuelo==='llegada'?'Llegada ':s.tipoVuelo==='salida'?'Salida ':'';
   const footerLines=[];
+  if(s.fecha){const fd=new Date(s.fecha+'T12:00:00');footerLines.push('Fecha: '+fd.toLocaleDateString('es-MX',{weekday:'long',day:'numeric',month:'long',year:'numeric'}));}
   if(s.agencia)footerLines.push('Agencia: '+s.agencia);
   if(s.pasajeros)footerLines.push('Pasajeros: '+s.pasajeros);
   if(s.vuelo)footerLines.push('Vuelo: '+tv+s.vuelo+(s.aerolinea?' · '+s.aerolinea:''));
   if(s.origen||s.destino)footerLines.push('Trayecto: '+(s.origen||'?')+' -> '+(s.destino||'?'));
   const footerLineH=6;
-  const footerStartY=H-margen-22;
+  const footerStartY=H-margen-6-(footerLines.length*footerLineH);
   doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(60,60,60);
   footerLines.forEach((line,i)=>doc.text(line,margen+10,footerStartY+(i*footerLineH)));
-  const zonaTop=margen+8,zonaBottom=H-margen-8,zonaCentro=zonaTop+(zonaBottom-zonaTop)/2;
+  const zonaTop=margen+8,zonaBottom=footerStartY-6,zonaCentro=zonaTop+(zonaBottom-zonaTop)/2;
   doc.setTextColor(0,0,0);doc.setFont('helvetica','bold');doc.setFontSize(72);
   doc.text('BIENVENIDOS',W/2,zonaCentro-22,{align:'center'});
   doc.setLineWidth(1.5);doc.setDrawColor(0,0,0);doc.line(50,zonaCentro-8,W-50,zonaCentro-8);
@@ -923,10 +924,10 @@ function generarBannerPDF(){
   const partes=(s.cliente||'').toUpperCase().trim().split(/\s+/);
   const nombres=partes.slice(0,2).join(' ');
   const apellidos=partes.slice(2).join(' ');
-  doc.setFontSize(48);
+  doc.setFontSize(58);
   if(apellidos){
-    doc.text(nombres,W/2,zonaCentro+14,{align:'center'});
-    doc.text(apellidos,W/2,zonaCentro+36,{align:'center'});
+    doc.text(nombres,W/2,zonaCentro+16,{align:'center'});
+    doc.text(apellidos,W/2,zonaCentro+40,{align:'center'});
   } else {
     doc.text(nombres,W/2,zonaCentro+22,{align:'center'});
   }
