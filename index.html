@@ -902,7 +902,7 @@ function generarBannerPDF(){
   const s=services.find(x=>x.id===bannerServiceId);if(!s)return;
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
-  const W=297,H=210,margen=18;
+  const W=297,H=210,margen=25;
   doc.setFillColor(255,255,255);doc.rect(0,0,W,H,'F');
   doc.setDrawColor(0,0,0);doc.setLineWidth(8);doc.rect(margen,margen,W-(margen*2),H-(margen*2),'S');
   const tv=s.tipoVuelo==='llegada'?'Llegada ':s.tipoVuelo==='salida'?'Salida ':'';
