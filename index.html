@@ -489,21 +489,10 @@ table.pdf-tbl td.red{color:#c0392b;font-weight:700;}
       </div>
       <button onclick="capAbrirModal()" style="background:var(--accent);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;">+ Nueva Captura</button>
     </div>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-      <div>
-        <div style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">Semana activa</div>
-        <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--text);margin-top:4px;" id="cap-semana-label">—</div>
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
-        <div style="display:flex;flex-direction:column;gap:4px;">
-          <label style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;">Inicio (Viernes)</label>
-          <input type="date" id="cap-semana-ini" onchange="capActualizarSemana()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.85rem;outline:none;font-family:'DM Sans',sans-serif;">
-        </div>
-        <div style="display:flex;flex-direction:column;gap:4px;">
-          <label style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;">Fin (Jueves)</label>
-          <input type="date" id="cap-semana-fin" onchange="capActualizarSemana()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.85rem;outline:none;font-family:'DM Sans',sans-serif;">
-        </div>
-      </div>
+    <div style="display:none;">
+      <div id="cap-semana-label">—</div>
+      <input type="date" id="cap-semana-ini" onchange="capActualizarSemana()">
+      <input type="date" id="cap-semana-fin" onchange="capActualizarSemana()">
     </div>
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow);">
       <div style="font-family:'Syne',sans-serif;font-size:.78rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid #fde68a;">📊 Resumen del período</div>
