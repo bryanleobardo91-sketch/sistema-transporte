@@ -427,7 +427,9 @@ table.pdf-tbl td.red{color:#c0392b;font-weight:700;}
       <button class="nav-tab active" onclick="showModulo('servicios',this)">📅 Servicios</button>
       <button class="nav-tab" onclick="showModulo('creditos',this)">💳 Créditos</button>
       <button class="nav-tab" onclick="showModulo('gasolina',this)">⛽ Gasolina</button>
+      <button class="nav-tab" onclick="showModulo('captura',this)">📋 Captura Diaria</button>
     </div>
+    <a href="liquidaciones.html" style="padding:7px 14px;font-family:'Syne',sans-serif;font-size:.75rem;font-weight:700;color:#d97706;background:rgba(217,119,6,.15);border:1px solid rgba(217,119,6,.4);border-radius:8px;cursor:pointer;text-transform:uppercase;letter-spacing:.05em;text-decoration:none;margin-left:8px;">📄 Liquidaciones</a>
     <button class="nav-sync" id="syncBtn" onclick="syncAll()" title="Estado de conexión">
       <span class="sync-dot" id="syncDot"></span> Nube
     </button>
@@ -475,6 +477,41 @@ table.pdf-tbl td.red{color:#c0392b;font-weight:700;}
       <div id="cTab-ccreditos" class="cpage"></div>
       <div id="cTab-cporcliente" class="cpage"></div>
       <div id="cTab-cporunidad" class="cpage"></div>
+    </div>
+  </div>
+
+  <!-- ══ MÓDULO CAPTURA DIARIA ══ -->
+  <div id="mod-captura" class="modulo" style="padding:20px;max-width:1200px;margin:0 auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+      <div>
+        <div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:var(--accent);">📋 Captura Diaria</div>
+        <div style="font-size:.82rem;color:var(--text2);margin-top:2px;">Registra venta y gasto de cada unidad por día</div>
+      </div>
+      <button onclick="capAbrirModal()" style="background:var(--accent);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;">+ Nueva Captura</button>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:16px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div>
+        <div style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;">Semana activa</div>
+        <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;color:var(--text);margin-top:4px;" id="cap-semana-label">—</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <label style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;">Inicio (Viernes)</label>
+          <input type="date" id="cap-semana-ini" onchange="capActualizarSemana()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.85rem;outline:none;font-family:'DM Sans',sans-serif;">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;">
+          <label style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;">Fin (Jueves)</label>
+          <input type="date" id="cap-semana-fin" onchange="capActualizarSemana()" style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:.85rem;outline:none;font-family:'DM Sans',sans-serif;">
+        </div>
+      </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow);">
+      <div style="font-family:'Syne',sans-serif;font-size:.78rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid #fde68a;">📊 Resumen del período</div>
+      <div id="cap-resumen-periodo"><div style="color:var(--text2);font-size:.85rem;text-align:center;padding:20px;">Selecciona un período para ver el resumen.</div></div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;box-shadow:var(--shadow);">
+      <div style="font-family:'Syne',sans-serif;font-size:.78rem;font-weight:800;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid #fde68a;">🗓️ Capturas registradas</div>
+      <div id="cap-lista"><div style="color:var(--text2);font-size:.85rem;text-align:center;padding:20px;">Cargando...</div></div>
     </div>
   </div>
 
@@ -548,6 +585,15 @@ table.pdf-tbl td.red{color:#c0392b;font-weight:700;}
     <div id="c-monto-libre-box" style="display:none;margin-bottom:12px">
       <label style="font-size:11px;color:#555;display:block;margin-bottom:4px;font-weight:600">Monto a pagar ($)</label>
       <input id="c-monto-libre" type="number" min="0.01" step="0.01" placeholder="0.00" style="width:100%;padding:6px 8px;font-size:13px;border:1px solid #ccc;border-radius:5px;color:#111;background:#fff">
+    </div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;color:#555;display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Responsable del pago</label>
+      <select id="c-pago-responsable" style="width:100%;padding:6px 8px;font-size:13px;border:1px solid #ccc;border-radius:5px;color:#111;background:#fff">
+        <option value="">— Selecciona responsable —</option>
+        <option>Yadira Villalba</option>
+        <option>Angélica Quiroz</option>
+        <option>Elizabeth</option>
+      </select>
     </div>
     <div class="cerr" id="c-pago-err"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
@@ -994,7 +1040,7 @@ async function confirmarRealizado(){
    CRÉDITOS
 ════════════════════════════════════ */
 const CRED_EMPRESA=EMPRESA;
-const UNIDADES_TAXI=[...Array.from({length:20},(_,i)=>`Taxi ${String(i+1).padStart(2,'00')}`), 'Camioneta Anselmo'];
+const UNIDADES_TAXI=[...Array.from({length:22},(_,i)=>`Taxi ${String(i+1).padStart(2,'00')}`), 'Camioneta Anselmo'];
 let cClientes=[],cCreditos=[];
 let cPagoModal=null,cSelIds=[],cModoLibre=false,cSoloPend=false;
 let cTabActual='cclientes',cFilCli='',cFilUni='';
@@ -1021,6 +1067,7 @@ async function loadCreditos(){
     pagado: parseFloat(r.pagado)||0,
     fecha: r.fecha||'',
     unidad: r.unidad||'',
+    responsable_registro: r.responsable_registro||'',
     pagos: r.pagos||[]
   }));
 }
@@ -1134,6 +1181,12 @@ function cRenderCreditos(q=''){
         <option value="">— Selecciona —</option>
         ${UNIDADES_TAXI.map(u=>`<option value="${u}">${u}</option>`).join('')}
       </select></div>
+      <div class="fg"><label>Registrado por</label><select id="cv-responsable">
+        <option value="">— Selecciona —</option>
+        <option>Yadira Villalba</option>
+        <option>Angélica Quiroz</option>
+        <option>Elizabeth</option>
+      </select></div>
       <div style="display:flex;flex-direction:column;justify-content:flex-end"><button class="cbtn cbtn-blue" onclick="cAgregarCredito()">+ Registrar</button></div>
     </div>
     <div class="cerr" id="cv-err"></div>
@@ -1141,9 +1194,10 @@ function cRenderCreditos(q=''){
   </div>
   <div class="cflex"><input style="max-width:280px;padding:6px 8px;font-size:13px;border:1px solid #ccc;border-radius:5px;" placeholder="Buscar..." oninput="cRenderCreditos(this.value)" value="${q}"></div>
   <div class="ctbl-wrap"><table class="ctbl">
-    <thead><tr><th>#</th><th>Código</th><th>Cliente</th><th>Fecha</th><th>Unidad</th><th>Monto</th><th>Pagado</th><th>Pendiente</th><th>Estado</th><th>Acciones</th></tr></thead>
+    <thead><tr><th>#</th><th>Código</th><th>Cliente</th><th>Fecha</th><th>Unidad</th><th>Monto</th><th>Pagado</th><th>Pendiente</th><th>Estado</th><th>Últ. pago</th><th>Responsable</th><th>Acciones</th></tr></thead>
     <tbody>${filtrados.length?filtrados.map((c,i)=>{
       const p=cPend(c),st=cGetStatus(c);
+      const ultPago=c.pagos.length?c.pagos[c.pagos.length-1]:null;
       return`<tr>
         <td style="color:#aaa">${i+1}</td><td>${cCodBadge(c.codigo)}</td>
         <td style="font-weight:600">${c.cliente}</td>
@@ -1152,13 +1206,15 @@ function cRenderCreditos(q=''){
         <td>${cfmt(c.monto)}</td><td style="color:#3B6D11">${cfmt(c.pagado)}</td>
         <td style="color:${p>0?'#c0392b':'#aaa'};font-weight:${p>0?600:400}">${cfmt(p)}</td>
         <td>${cbadge(st)}</td>
+        <td style="color:#666;white-space:nowrap;font-size:.82rem">${ultPago?cfmtDate(ultPago.fecha):'—'}</td>
+        <td style="color:#555;font-size:.82rem">${ultPago?(ultPago.responsable||'—'):'—'}</td>
         <td><div style="display:flex;gap:4px;flex-wrap:wrap">
           ${p>0?`<button class="cbtn-og" onclick="cAbrirPago('${c.codigo}')">Abonar</button>`:''}
           ${st==='pagado'?`<button class="cbtn-oo" onclick="cPdfHistorialUno('${c.id}')">PDF</button>`:''}
           <button class="cbtn-or" onclick="cEliminarCredito('${c.id}')">✕</button>
         </div></td>
       </tr>`;
-    }).join(''):`<tr><td colspan="10" style="text-align:center;color:#aaa;padding:2rem">${cCreditos.length===0?'Aún no hay créditos.':'Sin resultados.'}</td></tr>`}</tbody>
+    }).join(''):`<tr><td colspan="12" style="text-align:center;color:#aaa;padding:2rem">${cCreditos.length===0?'Aún no hay créditos.':'Sin resultados.'}</td></tr>`}</tbody>
   </table></div>`;
 }
 
@@ -1174,20 +1230,23 @@ async function cAgregarCredito(){
   const monto=parseFloat(document.getElementById('cv-monto').value);
   const fecha=document.getElementById('cv-fecha').value;
   const unidad=document.getElementById('cv-unidad').value;
+  const responsable=document.getElementById('cv-responsable').value;
   const err=document.getElementById('cv-err');
   if(!cod){err.textContent='Selecciona un cliente.';return;}
   if(isNaN(monto)||monto<=0){err.textContent='Ingresa un monto válido.';return;}
   if(!fecha){err.textContent='Selecciona una fecha.';return;}
   if(!unidad){err.textContent='Selecciona la unidad.';return;}
+  if(!responsable){err.textContent='Selecciona quién registra el crédito.';return;}
   err.textContent='';
   const cli=cClientes.find(c=>c.codigo===cod);
   setLoading(true);
   try{
-    const [row] = await supa.post('creditos',{codigo:cli.codigo,cliente:cli.nombre,monto,pagado:0,fecha,unidad,pagos:[]});
-    cCreditos.unshift({id:row.id,codigo:row.codigo,cliente:row.cliente,monto:parseFloat(row.monto),pagado:0,fecha:row.fecha,unidad:row.unidad,pagos:[]});
+    const [row] = await supa.post('creditos',{codigo:cli.codigo,cliente:cli.nombre,monto,pagado:0,fecha,unidad,responsable_registro:responsable,pagos:[]});
+    cCreditos.unshift({id:row.id,codigo:row.codigo,cliente:row.cliente,monto:parseFloat(row.monto),pagado:0,fecha:row.fecha,unidad:row.unidad,responsable_registro:row.responsable_registro||responsable,pagos:[]});
     document.getElementById('cv-monto').value='';
     document.getElementById('cv-fecha').value=cToday();
     document.getElementById('cv-unidad').value='';
+    document.getElementById('cv-responsable').value='';
     cRenderCreditos();
     toast('Crédito registrado ✓','ok');
   }catch(e){
@@ -1379,6 +1438,7 @@ function cAbrirPago(cod){
   document.getElementById('c-pago-err').textContent='';
   document.getElementById('c-monto-libre').value='';
   document.getElementById('c-monto-libre-box').style.display='none';
+  document.getElementById('c-pago-responsable').value='';
   document.getElementById('c-btn-completo').classList.add('active');
   document.getElementById('c-btn-libre').classList.remove('active');
   cRenderCheckList();
@@ -1413,6 +1473,8 @@ function cCerrarPago(){document.getElementById('c-modal-pago').style.display='no
 async function cAplicarPago(){
   const err=document.getElementById('c-pago-err');
   if(!cSelIds.length){err.textContent='Selecciona al menos un servicio.';return;}
+  const responsablePago=document.getElementById('c-pago-responsable').value;
+  if(!responsablePago){err.textContent='Selecciona quién registra el pago.';return;}
   const totalSel=cCreditos.filter(c=>cSelIds.includes(c.id)).reduce((s,c)=>s+cPend(c),0);
   let pagosActualizar=[];
   if(cModoLibre){
@@ -1425,14 +1487,14 @@ async function cAplicarPago(){
       const p=cPend(c);const aplicar=Math.min(p,restante);
       restante=parseFloat((restante-aplicar).toFixed(2));
       const nuevoPagado=parseFloat((c.pagado+aplicar).toFixed(2));
-      const nuevosPagos=[...c.pagos,{monto:aplicar,fecha:cToday()}];
+      const nuevosPagos=[...c.pagos,{monto:aplicar,fecha:cToday(),responsable:responsablePago}];
       pagosActualizar.push({id:c.id,pagado:nuevoPagado,pagos:nuevosPagos});
       c.pagado=nuevoPagado;c.pagos=nuevosPagos;
     });
   } else {
     cCreditos.forEach(c=>{
       if(!cSelIds.includes(c.id))return;
-      const nuevosPagos=[...c.pagos,{monto:cPend(c),fecha:cToday()}];
+      const nuevosPagos=[...c.pagos,{monto:cPend(c),fecha:cToday(),responsable:responsablePago}];
       pagosActualizar.push({id:c.id,pagado:c.monto,pagos:nuevosPagos});
       c.pagado=c.monto;c.pagos=nuevosPagos;
     });
@@ -1473,11 +1535,11 @@ function cPdfHistCli(cod){
   const cliInfo=cClientes.find(c=>c.codigo===cod);
   const pags=cCreditos.filter(c=>c.codigo===cod&&cGetStatus(c)==='pagado');
   const total=pags.reduce((s,c)=>s+c.monto,0);
-  cMostrarPDF('Historial de pagos',[{label:'Cliente',valor:cliInfo?.nombre||'—'},{label:'Código',valor:cod}],[{label:'#'},{label:'Fecha servicio'},{label:'Unidad'},{label:'Monto',r:true},{label:'Fecha pago'},{label:'Pagado',r:true}],pags.map((c,i)=>[i+1,cfmtDate(c.fecha),c.unidad,cfmt(c.monto),c.pagos.length?cfmtDate(c.pagos[c.pagos.length-1].fecha):'—',cfmt(c.pagado)]),cfmt(total),'Total cobrado',`${pags.length} servicio(s) pagado(s)`);
+  cMostrarPDF('Historial de pagos',[{label:'Cliente',valor:cliInfo?.nombre||'—'},{label:'Código',valor:cod}],[{label:'#'},{label:'Fecha servicio'},{label:'Unidad'},{label:'Monto',r:true},{label:'Fecha pago'},{label:'Responsable'},{label:'Pagado',r:true}],pags.map((c,i)=>[i+1,cfmtDate(c.fecha),c.unidad,cfmt(c.monto),c.pagos.length?cfmtDate(c.pagos[c.pagos.length-1].fecha):'—',c.pagos.length?(c.pagos[c.pagos.length-1].responsable||'—'):'—',cfmt(c.pagado)]),cfmt(total),'Total cobrado',`${pags.length} servicio(s) pagado(s)`);
 }
 function cPdfHistorialUno(id){
   const c=cCreditos.find(x=>x.id===id);if(!c)return;
-  cMostrarPDF('Historial de pago — servicio',[{label:'Cliente',valor:c.cliente},{label:'Código',valor:c.codigo},{label:'Unidad',valor:c.unidad}],[{label:'#'},{label:'Fecha servicio'},{label:'Monto',r:true},{label:'Fecha pago'},{label:'Pagado',r:true}],[[1,cfmtDate(c.fecha),cfmt(c.monto),c.pagos.length?cfmtDate(c.pagos[c.pagos.length-1].fecha):'—',cfmt(c.pagado)]],cfmt(c.monto),'Total cobrado','1 servicio pagado');
+  cMostrarPDF('Historial de pago — servicio',[{label:'Cliente',valor:c.cliente},{label:'Código',valor:c.codigo},{label:'Unidad',valor:c.unidad}],[{label:'#'},{label:'Fecha servicio'},{label:'Monto',r:true},{label:'Fecha pago'},{label:'Responsable'},{label:'Pagado',r:true}],[[1,cfmtDate(c.fecha),cfmt(c.monto),c.pagos.length?cfmtDate(c.pagos[c.pagos.length-1].fecha):'—',c.pagos.length?(c.pagos[c.pagos.length-1].responsable||'—'):'—',cfmt(c.pagado)]],cfmt(c.monto),'Total cobrado','1 servicio pagado');
 }
 function cPdfPendUni(unidad){
   const pends=cCreditos.filter(c=>c.unidad===unidad&&cPend(c)>0);
@@ -2230,6 +2292,294 @@ function pinCerrar(){
   document.getElementById('pin-overlay').style.display = 'none';
   pinCallback = null;
   pinResponsable = null;
+}
+</script>
+
+<!-- ══ MODAL CAPTURA DIARIA ══ -->
+<div id="cap-modal" style="display:none;position:fixed;inset:0;background:rgba(30,36,51,.7);z-index:9990;align-items:flex-start;justify-content:center;padding:12px;overflow-y:auto;">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:900px;margin:0 auto;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;">
+    <div style="background:#1e2433;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div style="font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:#d97706;">📋 Captura Diaria — Solo Venta</div>
+      <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <div style="display:flex;flex-direction:column;gap:3px;">
+          <label style="font-size:.65rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.06em;">Fecha</label>
+          <input type="date" id="cap-fecha" style="padding:6px 10px;border:1.5px solid #3d4a60;border-radius:7px;font-size:.88rem;font-family:'DM Sans',sans-serif;background:#2d3a50;color:#fff;outline:none;">
+        </div>
+        <div style="display:flex;flex-direction:column;gap:3px;">
+          <label style="font-size:.65rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.06em;">Responsable</label>
+          <select id="cap-responsable" style="padding:6px 10px;border:1.5px solid #3d4a60;border-radius:7px;font-size:.88rem;font-family:'DM Sans',sans-serif;background:#2d3a50;color:#fff;outline:none;">
+            <option value="">— Selecciona —</option>
+            <option>Yadira Villalba</option>
+            <option>Angélica Quiroz</option>
+            <option>Elizabeth</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr style="background:#f7f9fc;border-bottom:2px solid #dde3ed;">
+            <th style="padding:8px 14px;font-family:'Syne',sans-serif;font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;text-align:left;width:36px;">#</th>
+            <th style="padding:8px 14px;font-family:'Syne',sans-serif;font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;text-align:left;">Unidad</th>
+            <th style="padding:8px 14px;font-family:'Syne',sans-serif;font-size:.72rem;font-weight:800;color:#6b7280;text-transform:uppercase;letter-spacing:.06em;text-align:center;">Venta del día ($)</th>
+          </tr>
+        </thead>
+        <tbody id="cap-tabla-body"></tbody>
+        <tfoot>
+          <tr style="background:#1e2433;">
+            <td colspan="2" style="padding:10px 14px;font-family:'Syne',sans-serif;font-size:.82rem;font-weight:800;color:#d97706;">VENTA TOTAL</td>
+            <td style="padding:10px 14px;font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;color:#34d399;text-align:center;" id="cap-tot-venta">$0.00</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <div style="padding:12px 24px;border-top:1px solid #dde3ed;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;background:#f7f9fc;">
+      <div id="cap-err" style="color:var(--red);font-size:.8rem;"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button onclick="capCerrarModal()" style="padding:8px 18px;border:1px solid #dde3ed;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;background:#fff;">Cancelar</button>
+        <button onclick="capGenerarPDF()" style="padding:8px 18px;background:#2563eb;color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;">🖨️ PDF Resumen</button>
+        <button onclick="capGuardar()" style="padding:8px 18px;background:#d97706;color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;">✓ Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════
+   CAPTURA DIARIA
+════════════════════════════════════ */
+let capCapturas = [];
+
+function capSemanaActual(){
+  const hoy = new Date(); const dia = hoy.getDay();
+  const diasDesdeVie = (dia >= 5) ? (dia - 5) : (dia + 2);
+  const viernes = new Date(hoy); viernes.setDate(hoy.getDate() - diasDesdeVie);
+  const jueves = new Date(viernes); jueves.setDate(viernes.getDate() + 6);
+  return { ini: capDateStr(viernes), fin: capDateStr(jueves) };
+}
+function capDateStr(d){ return d.toISOString().split('T')[0]; }
+function capFmtDate(s){ if(!s) return '—'; const [y,m,d]=s.split('-'); return d+'/'+m+'/'+y; }
+function capDiaSem(s){ return ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][new Date(s+'T12:00:00').getDay()]; }
+function capFmt(n){ return '$'+(parseFloat(n)||0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+async function loadCapturaDiaria(){
+  try{ const rows = await supa.get('liq_capturas','select=*&order=fecha.desc'); capCapturas = rows; }
+  catch(e){ console.error('loadCap',e); capCapturas=[]; }
+}
+
+function capIniciarSemana(){
+  const s = capSemanaActual();
+  document.getElementById('cap-semana-ini').value = s.ini;
+  document.getElementById('cap-semana-fin').value  = s.fin;
+  capActualizarSemana();
+}
+
+function capActualizarSemana(){
+  const ini = document.getElementById('cap-semana-ini').value;
+  const fin = document.getElementById('cap-semana-fin').value;
+  if(ini && fin){
+    document.getElementById('cap-semana-label').textContent = capFmtDate(ini)+' — '+capFmtDate(fin);
+    capRenderResumen(ini, fin);
+    capRenderLista();
+  }
+}
+
+function capGenerarTabla(datosExist){
+  const tbody = document.getElementById('cap-tabla-body');
+  if(!tbody) return;
+  tbody.innerHTML = UNIDADES_TAXI.map(function(u,i){
+    const key = u.replace(/\s/g,'_');
+    const v = (datosExist && datosExist[u]) ? (datosExist[u].venta||'') : '';
+    const bg = (i%2===0) ? '#fff' : '#fafbfd';
+    const num = (i+1 < 10 ? '0'+(i+1) : ''+(i+1));
+    return '<tr style="border-bottom:1px solid #f0f4f8;background:'+bg+';" id="cap-row-'+key+'">'
+      + '<td style="padding:5px 14px;font-family:sans-serif;font-size:.75rem;font-weight:700;color:#6b7280;">'+num+'</td>'
+      + '<td style="padding:5px 14px;font-size:.85rem;font-weight:700;white-space:nowrap;">\uD83D\uDE95 '+u+'</td>'
+      + '<td style="padding:4px 24px;text-align:center;">'
+      + '<input type="number" id="cap-v-'+key+'" min="0" step="1" value="'+v+'" placeholder="0"'
+      + ' oninput="capUpdRow(\''+key+'\')"'
+      + ' onfocus="this.style.borderColor=\'#d97706\';this.select()"'
+      + ' onblur="this.style.borderColor=\'#dde3ed\'"'
+      + ' style="width:140px;padding:6px 10px;border:1.5px solid #dde3ed;border-radius:6px;font-size:.95rem;font-weight:700;text-align:right;outline:none;background:#fff;">'
+      + '</td></tr>';
+  }).join('');
+  capActualizarTotales();
+}
+
+
+function capUpdRow(key){
+  const v = parseFloat(document.getElementById('cap-v-'+key)?.value)||0;
+  const row = document.getElementById('cap-row-'+key);
+  if(row) row.style.background = v ? '#fffbf0' : '';
+  capActualizarTotales();
+}
+
+function capActualizarTotales(){
+  let totV=0;
+  UNIDADES_TAXI.forEach(u=>{ totV += parseFloat(document.getElementById('cap-v-'+u.replace(/\s/g,'_'))?.value)||0; });
+  const el = document.getElementById('cap-tot-venta');
+  if(el) el.textContent = capFmt(totV);
+}
+
+function capAbrirModal(fechaEditar){
+  const hoy = capDateStr(new Date());
+  document.getElementById('cap-fecha').value = fechaEditar || hoy;
+  document.getElementById('cap-err').textContent = '';
+  const datosPrev = fechaEditar ? (()=>{ const c=capCapturas.find(x=>x.fecha===fechaEditar); return c?(typeof c.datos==='string'?JSON.parse(c.datos):c.datos||{}):{};})() : {};
+  if(fechaEditar){ const c=capCapturas.find(x=>x.fecha===fechaEditar); if(c) document.getElementById('cap-responsable').value=c.responsable||''; }
+  else document.getElementById('cap-responsable').value='';
+  capGenerarTabla(datosPrev);
+  document.getElementById('cap-modal').style.display='flex';
+}
+
+function capCerrarModal(){ document.getElementById('cap-modal').style.display='none'; }
+function capEditar(fecha){ capAbrirModal(fecha); }
+
+function capGenerarPDF(){
+  const fecha = document.getElementById('cap-fecha').value;
+  const resp  = document.getElementById('cap-responsable').value;
+  if(!fecha){ toast('Selecciona la fecha primero','err'); return; }
+  const filas=[]; let totV=0;
+  UNIDADES_TAXI.forEach((u,i)=>{
+    const v=parseFloat(document.getElementById('cap-v-'+u.replace(/\s/g,'_'))?.value)||0;
+    if(v){ filas.push({num:String(i+1).padStart(2,'0'),unidad:u,venta:v}); totV+=v; }
+  });
+  if(!filas.length){ toast('Sin datos para generar PDF','err'); return; }
+  const { jsPDF } = window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'letter'});
+  const ml=15,W=215.9,cw=W-30; let y=18;
+  doc.setFont('helvetica','bold'); doc.setFontSize(9);
+  doc.text('CORPORACION DE TRABAJADORES AL SERVICIO PUBLICO FEDERAL DEL AEROPUERTO DE LOS MOCHIS',ml,y);
+  y+=6; doc.setFont('helvetica','normal'); doc.setFontSize(8);
+  doc.text('RESUMEN DE CAPTURA DIARIA',ml,y);
+  doc.text('Fecha: '+capFmtDate(fecha),W-ml,y,{align:'right'});
+  y+=4; if(resp) doc.text('Responsable: '+resp,ml,y);
+  y+=6; doc.setDrawColor(180,180,180); doc.line(ml,y,W-ml,y); y+=5;
+  doc.setFillColor(30,36,51); doc.rect(ml,y-4,cw,7,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(8); doc.setTextColor(217,119,6);
+  doc.text('#',ml+2,y); doc.text('UNIDAD',ml+14,y); doc.text('VENTA',W-ml-2,y,{align:'right'});
+  doc.setTextColor(0,0,0); y+=5;
+  filas.forEach((f,i)=>{
+    if(i%2===0){ doc.setFillColor(247,249,252); doc.rect(ml,y-4,cw,6,'F'); }
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+    doc.text(f.num,ml+2,y); doc.text(f.unidad,ml+14,y);
+    doc.setFont('helvetica','bold');
+    doc.text('$'+f.venta.toLocaleString('es-MX',{minimumFractionDigits:2}),W-ml-2,y,{align:'right'});
+    y+=6; if(y>260){ doc.addPage(); y=20; }
+  });
+  y+=2; doc.setFillColor(30,36,51); doc.rect(ml,y-4,cw,8,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(217,119,6);
+  doc.text('VENTA TOTAL',ml+2,y+0.5); doc.setTextColor(52,211,153);
+  doc.text('$'+totV.toLocaleString('es-MX',{minimumFractionDigits:2}),W-ml-2,y+0.5,{align:'right'});
+  doc.setTextColor(0,0,0); y+=12;
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(100,100,100);
+  doc.text(filas.length+' unidad(es)  ·  '+capFmtDate(fecha),ml,y);
+  doc.save('Captura_'+fecha+'.pdf');
+  toast('PDF generado ✓','ok');
+}
+
+async function capGuardar(){
+  const fecha=document.getElementById('cap-fecha').value;
+  const resp=document.getElementById('cap-responsable').value;
+  const err=document.getElementById('cap-err');
+  if(!fecha){ err.textContent='Selecciona la fecha.'; return; }
+  if(!resp){ err.textContent='Selecciona el responsable.'; return; }
+  const datos={}; let hayDatos=false;
+  UNIDADES_TAXI.forEach(u=>{
+    const v=parseFloat(document.getElementById('cap-v-'+u.replace(/\s/g,'_'))?.value)||0;
+    if(v){ hayDatos=true; datos[u]={venta:v}; }
+  });
+  if(!hayDatos){ err.textContent='Ingresa la venta de al menos un carro.'; return; }
+  err.textContent='';
+  pinSolicitar(resp,'Guardar captura del '+capFmtDate(fecha), async ()=>{
+    setLoading(true);
+    try{
+      const exist=capCapturas.find(c=>c.fecha===fecha);
+      if(exist){
+        await supa.patch('liq_capturas','fecha=eq.'+fecha,{datos:JSON.stringify(datos),responsable:resp});
+        const idx=capCapturas.findIndex(c=>c.fecha===fecha);
+        if(idx>=0) capCapturas[idx]={...capCapturas[idx],datos:JSON.stringify(datos),responsable:resp};
+      } else {
+        const [row]=await supa.post('liq_capturas',{fecha,datos:JSON.stringify(datos),responsable:resp});
+        capCapturas.unshift(row);
+      }
+      capRenderLista();
+      capRenderResumen(document.getElementById('cap-semana-ini').value, document.getElementById('cap-semana-fin').value);
+      capCerrarModal();
+      toast('Captura guardada ✓','ok');
+    }catch(e){ err.textContent='Error: '+e.message; toast('Error al guardar','err'); }
+    setLoading(false);
+  });
+}
+
+function capRenderLista(){
+  const ini=document.getElementById('cap-semana-ini').value;
+  const fin=document.getElementById('cap-semana-fin').value;
+  const filtradas=(ini&&fin)?capCapturas.filter(c=>c.fecha>=ini&&c.fecha<=fin):capCapturas.slice(0,14);
+  const el=document.getElementById('cap-lista');
+  if(!filtradas.length){ el.innerHTML='<div style="color:var(--text2);font-size:.85rem;text-align:center;padding:20px;">Sin capturas en el período.</div>'; return; }
+  el.innerHTML='<div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border);">'
+    +'<table style="width:100%;border-collapse:collapse;background:#fff;">'
+    +'<thead style="background:#1e2433;"><tr>'
+    +['Día','Fecha','Carros','Venta Total','Responsable',''].map(function(h){ return '<th style="padding:9px 12px;font-family:sans-serif;font-size:.7rem;font-weight:700;color:#d97706;text-transform:uppercase;text-align:left;">'+h+'</th>'; }).join('')
+    +'</tr></thead><tbody>'
+    +filtradas.map(c=>{
+      const d=typeof c.datos==='string'?JSON.parse(c.datos):(c.datos||{});
+      const totV=Object.values(d).reduce((s,x)=>s+(x.venta||0),0);
+      return '<tr style="border-bottom:1px solid var(--border);">'
+        +'<td style="padding:9px 12px;font-weight:700;">'+capDiaSem(c.fecha)+'</td>'
+        +'<td style="padding:9px 12px;">'+capFmtDate(c.fecha)+'</td>'
+        +'<td style="padding:9px 12px;"><span style="background:#dbeafe;color:#1d4ed8;padding:3px 9px;border-radius:20px;font-size:.7rem;font-weight:700;">'+Object.keys(d).length+' carros</span></td>'
+        +'<td style="padding:9px 12px;text-align:right;font-weight:600;color:var(--green);">'+capFmt(totV)+'</td>'
+        +'<td style="padding:9px 12px;font-size:.8rem;color:var(--text2);">'+(c.responsable||'—')+'</td>'
+        +'<td style="padding:9px 12px;"><button onclick="capEditar(\\\"'+c.fecha+'\\\")" style="padding:5px 10px;font-size:.72rem;font-weight:700;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:var(--surface2);">✏️ Editar</button></td>'
+        +'</tr>';
+    }).join('')+'</tbody></table></div>';
+}
+
+function capRenderResumen(ini, fin){
+  const filtradas=capCapturas.filter(c=>c.fecha>=ini&&c.fecha<=fin);
+  const totales={};
+  UNIDADES_TAXI.forEach(u=>{ totales[u]={venta:0,dias:0}; });
+  filtradas.forEach(c=>{
+    const d=typeof c.datos==='string'?JSON.parse(c.datos):(c.datos||{});
+    Object.entries(d).forEach(([u,v])=>{ if(totales[u]){ totales[u].venta+=v.venta||0; totales[u].dias++; } });
+  });
+  const activos=UNIDADES_TAXI.filter(u=>totales[u].dias>0);
+  if(!activos.length){ document.getElementById('cap-resumen-periodo').innerHTML='<div style="color:var(--text2);font-size:.85rem;text-align:center;padding:20px;">Sin capturas en esta semana.</div>'; return; }
+  const totV=activos.reduce((s,u)=>s+totales[u].venta,0);
+  document.getElementById('cap-resumen-periodo').innerHTML=
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px;">'
+    +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:5px;">Venta Total</div><div style="font-family:Syne,sans-serif;font-size:1.2rem;font-weight:800;color:var(--green);">'+capFmt(totV)+'</div></div>'
+    +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:5px;">Carros Activos</div><div style="font-family:Syne,sans-serif;font-size:1.2rem;font-weight:800;">'+activos.length+'</div></div>'
+    +'<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;"><div style="font-size:.7rem;font-weight:700;color:var(--text2);text-transform:uppercase;margin-bottom:5px;">Días Capturados</div><div style="font-family:Syne,sans-serif;font-size:1.2rem;font-weight:800;">'+filtradas.length+'</div></div>'
+    +'</div>'
+    +'<div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border);"><table style="width:100%;border-collapse:collapse;background:#fff;">'
+    +'<thead style="background:#1e2433;"><tr>'+['Unidad','Días','Venta'].map(h=>'<th style="padding:8px 12px;font-family:Syne,sans-serif;font-size:.7rem;font-weight:700;color:#d97706;text-transform:uppercase;text-align:left;">'+h+'</th>').join('')+'</tr></thead>'
+    +'<tbody>'+activos.map(u=>'<tr style="border-bottom:1px solid var(--border);">'
+      +'<td style="padding:8px 12px;font-weight:700;">'+u+'</td>'
+      +'<td style="padding:8px 12px;color:var(--text2);">'+totales[u].dias+'</td>'
+      +'<td style="padding:8px 12px;text-align:right;color:var(--green);font-weight:600;">'+capFmt(totales[u].venta)+'</td>'
+      +'</tr>').join('')+'</tbody>'
+    +'<tfoot><tr style="background:var(--surface2);"><td style="padding:9px 12px;font-family:Syne,sans-serif;font-weight:800;border-top:2px solid var(--border);" colspan="2">TOTAL</td>'
+    +'<td style="padding:9px 12px;text-align:right;font-family:Syne,sans-serif;font-weight:800;color:var(--green);border-top:2px solid var(--border);">'+capFmt(totV)+'</td></tr></tfoot>'
+    +'</table></div>';
+}
+
+const _origInitApp = initApp;
+async function initApp(){
+  await _origInitApp();
+  await loadCapturaDiaria();
+  capIniciarSemana();
+  capRenderLista();
+}
+const _origSyncAll = syncAll;
+async function syncAll(){
+  await _origSyncAll();
+  await loadCapturaDiaria();
+  capRenderLista();
+  capActualizarSemana();
 }
 </script>
 </body>
