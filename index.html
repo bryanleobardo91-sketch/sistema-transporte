@@ -2367,10 +2367,10 @@ function capIniciarSemana(){
 }
 
 function capActualizarSemana(){
-  const ini = document.getElementById('cap-semana-ini').value;
-  const fin = document.getElementById('cap-semana-fin').value;
+  const s = capSemanaActual();
+  const ini = document.getElementById('cap-semana-ini').value || s.ini;
+  const fin = document.getElementById('cap-semana-fin').value || s.fin;
   if(ini && fin){
-    document.getElementById('cap-semana-label').textContent = capFmtDate(ini)+' — '+capFmtDate(fin);
     capRenderResumen(ini, fin);
     capRenderLista();
   }
@@ -2505,9 +2505,7 @@ async function capGuardar(){
 }
 
 function capRenderLista(){
-  const ini=document.getElementById('cap-semana-ini').value;
-  const fin=document.getElementById('cap-semana-fin').value;
-  const filtradas=(ini&&fin)?capCapturas.filter(c=>c.fecha>=ini&&c.fecha<=fin):capCapturas.slice(0,14);
+  const filtradas=capCapturas.slice(0,60);
   const el=document.getElementById('cap-lista');
   if(!filtradas.length){ el.innerHTML='<div style="color:var(--text2);font-size:.85rem;text-align:center;padding:20px;">Sin capturas en el período.</div>'; return; }
   el.innerHTML='<div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border);">'
