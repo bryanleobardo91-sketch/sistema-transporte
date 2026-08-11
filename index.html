@@ -696,8 +696,9 @@ function cerrarSesion(){
 async function initApp(){
   setLoading(true);
   try {
-    await Promise.all([loadServices(), loadClientes(), loadCreditos(), loadGasolina()]);
+    await Promise.all([loadServices(), loadClientes(), loadCreditos(), loadGasolina(), loadCapturaDiaria()]);
     renderCalendar(); renderSide(); cRenderAll(); if(gTabActual==='turno') gRenderTurno();
+    capIniciarSemana(); capRenderLista();
     setSyncStatus(true);
     toast('Datos cargados desde la nube ☁️','ok');
   } catch(e){
@@ -710,8 +711,9 @@ async function initApp(){
 async function syncAll(){
   setLoading(true);
   try{
-    await Promise.all([loadServices(), loadClientes(), loadCreditos(), loadGasolina()]);
+    await Promise.all([loadServices(), loadClientes(), loadCreditos(), loadGasolina(), loadCapturaDiaria()]);
     renderCalendar(); renderSide(); cRenderAll(); if(gTabActual==='turno') gRenderTurno();
+    capRenderLista(); capActualizarSemana();
     setSyncStatus(true);
     toast('Sincronizado correctamente ✓','ok');
   }catch(e){
@@ -2567,20 +2569,7 @@ function capRenderResumen(ini, fin){
     +'</table></div>';
 }
 
-const _origInitApp = initApp;
-async function initApp(){
-  await _origInitApp();
-  await loadCapturaDiaria();
-  capIniciarSemana();
-  capRenderLista();
-}
-const _origSyncAll = syncAll;
-async function syncAll(){
-  await _origSyncAll();
-  await loadCapturaDiaria();
-  capRenderLista();
-  capActualizarSemana();
-}
+
 </script>
 </body>
 </html>
