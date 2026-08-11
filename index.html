@@ -2427,6 +2427,52 @@ function capAbrirModal(fechaEditar){
 function capCerrarModal(){ document.getElementById('cap-modal').style.display='none'; }
 function capEditar(fecha){ capAbrirModal(fecha); }
 
+function capPDFDesdelista(fecha){
+  const cap = capCapturas.find(c=>c.fecha===fecha);
+  if(!cap){ toast('No se encontró la captura','err'); return; }
+  const datos = typeof cap.datos==='string'?JSON.parse(cap.datos):(cap.datos||{});
+  const resp = cap.responsable||'—';
+  const filas=[]; let totV=0;
+  UNIDADES_TAXI.forEach((u,i)=>{
+    const d = datos[u];
+    if(d && d.venta){ filas.push({num:String(i+1).padStart(2,'0'), unidad:u, venta:d.venta}); totV+=d.venta; }
+  });
+  if(!filas.length){ toast('Sin datos para generar PDF','err'); return; }
+  const doc=new jspdf.jsPDF({unit:'mm',format:'letter'});
+  const W=216, ml=14, cw=W-ml*2;
+  doc.setFillColor(30,36,51); doc.rect(0,0,W,22,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.setTextColor(217,119,6);
+  doc.text('CORP. AEROPUERTO — CAPTURA DIARIA',ml,10);
+  doc.setFontSize(8); doc.setTextColor(180,180,180);
+  doc.text('Los Mochis · Sistema de Gestión',ml,16);
+  doc.setTextColor(0,0,0); let y=32;
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(80,80,80);
+  doc.text('Fecha:',ml,y); doc.setFont('helvetica','normal'); doc.text(capFmtDate(fecha),ml+18,y);
+  doc.setFont('helvetica','bold'); doc.text('Responsable:',ml+80,y); doc.setFont('helvetica','normal'); doc.text(resp,ml+105,y);
+  y+=10;
+  doc.setFillColor(30,36,51); doc.rect(ml,y-5,cw,8,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(8.5); doc.setTextColor(217,119,6);
+  doc.text('#',ml+2,y); doc.text('Unidad',ml+12,y); doc.text('Venta',W-ml-2,y,{align:'right'});
+  doc.setTextColor(0,0,0); y+=6;
+  filas.forEach((f,i)=>{
+    if(i%2===0){ doc.setFillColor(247,249,252); doc.rect(ml,y-4,cw,6,'F'); }
+    doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+    doc.text(f.num,ml+2,y); doc.text(f.unidad,ml+12,y);
+    doc.setFont('helvetica','bold');
+    doc.text('$'+f.venta.toLocaleString('es-MX',{minimumFractionDigits:2}),W-ml-2,y,{align:'right'});
+    y+=6; if(y>260){ doc.addPage(); y=20; }
+  });
+  y+=2; doc.setFillColor(30,36,51); doc.rect(ml,y-4,cw,8,'F');
+  doc.setFont('helvetica','bold'); doc.setFontSize(9); doc.setTextColor(217,119,6);
+  doc.text('VENTA TOTAL',ml+2,y+0.5); doc.setTextColor(52,211,153);
+  doc.text('$'+totV.toLocaleString('es-MX',{minimumFractionDigits:2}),W-ml-2,y+0.5,{align:'right'});
+  doc.setTextColor(0,0,0); y+=12;
+  doc.setFont('helvetica','normal'); doc.setFontSize(7.5); doc.setTextColor(100,100,100);
+  doc.text(filas.length+' unidad(es)  ·  '+capFmtDate(fecha),ml,y);
+  doc.save('Captura_'+fecha+'.pdf');
+  toast('PDF generado ✓','ok');
+}
+
 function capGenerarPDF(){
   const fecha = document.getElementById('cap-fecha').value;
   const resp  = document.getElementById('cap-responsable').value;
@@ -2522,7 +2568,10 @@ function capRenderLista(){
         +'<td style="padding:9px 12px;"><span style="background:#dbeafe;color:#1d4ed8;padding:3px 9px;border-radius:20px;font-size:.7rem;font-weight:700;">'+Object.keys(d).length+' carros</span></td>'
         +'<td style="padding:9px 12px;text-align:right;font-weight:600;color:var(--green);">'+capFmt(totV)+'</td>'
         +'<td style="padding:9px 12px;font-size:.8rem;color:var(--text2);">'+(c.responsable||'—')+'</td>'
-        +'<td style="padding:9px 12px;"><button onclick="capEditar(\\\"'+c.fecha+'\\\")" style="padding:5px 10px;font-size:.72rem;font-weight:700;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:var(--surface2);">✏️ Editar</button></td>'
+        +'<td style="padding:9px 12px;display:flex;gap:6px;">'
+        +'<button onclick="capEditar(\''+c.fecha+'\')" style="padding:5px 10px;font-size:.72rem;font-weight:700;border:1px solid var(--border);border-radius:6px;cursor:pointer;background:var(--surface2);">✏️ Editar</button>'
+        +'<button onclick="capPDFDesdelista(\''+c.fecha+'\')" style="padding:5px 10px;font-size:.72rem;font-weight:700;border:none;border-radius:6px;cursor:pointer;background:#d97706;color:#fff;">📄 PDF</button>'
+        +'</td>'
         +'</tr>';
     }).join('')+'</tbody></table></div>';
 }
